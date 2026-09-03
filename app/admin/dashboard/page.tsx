@@ -1,0 +1,304 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
+
+type Project = {
+    id: string;
+    title: string;
+    description: string | null;
+    image_url: string | null;
+    project_url: string | null;
+};
+
+type Profile = {
+    id: number;
+    name: string | null;
+    title: string | null;
+    bio: string | null;
+    badge_text: string | null;
+    github_url: string | null;
+    linkedin_url: string | null;
+    email: string | null;
+    avatar_url: string | null;
+};
+
+export default function Dashboard() {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [projectUrl, setProjectUrl] = useState("");
+
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const [profileSaved, setProfileSaved] = useState(false);
+
+    const router = useRouter();
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => {
+            if (!data.user) {
+                router.push("/admin");
+            } else {
+                setUser(data.user);
+                loadProjects();
+                loadProfile();
+            }
+            setLoading(false);
+        });
+    }, [router]);
+
+    async function loadProjects() {
+        const { data } = await supabase
+            .from("projects")
+            .select("*")
+            .order("created_at", { ascending: false });
+        setProjects(data ?? []);
+    }
+
+    async function loadProfile() {
+        const { data } = await supabase.from("profile").select("*").single();
+        setProfile(data);
+    }
+
+    async function handleAddProject(e: React.FormEvent) {
+        e.preventDefault();
+        await supabase.from("projects").insert({
+            title,
+            description,
+            project_url: projectUrl,
+        });
+        setTitle("");
+        setDescription("");
+        setProjectUrl("");
+        loadProjects();
+    }
+
+    async function handleDelete(id: string) {
+        await supabase.from("projects").delete().eq("id", id);
+        loadProjects();
+    }
+
+    async function handleSaveProfile(e: React.FormEvent) {
+        e.preventDefault();
+        if (!profile) return;
+        await supabase
+            .from("profile")
+            .update({
+                name: profile.name,
+                title: profile.title,
+                bio: profile.bio,
+                badge_text: profile.badge_text,
+                github_url: profile.github_url,
+                linkedin_url: profile.linkedin_url,
+                email: profile.email,
+                avatar_url: profile.avatar_url,
+            })
+            .eq("id", 1);
+        setProfileSaved(true);
+        setTimeout(() => setProfileSaved(false), 2000);
+    }
+
+
+    async function handleLogout() {
+        await supabase.auth.signOut();
+        router.push("/admin");
+    }
+
+    if (loading) {
+        return <p className="p-6">Yükleniyor...</p>;
+    }
+
+    if (!user) {
+        return null;
+    }
+
+
+    async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file || !profile) return;
+
+        const filePath = `avatar-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+        setProfile({ ...profile, avatar_url: data.publicUrl });
+    }
+
+    return (
+        <div className="max-w-2xl mx-auto px-6 py-16 space-y-12">
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold">Admin Panel</h1>
+                <button onClick={handleLogout} className="text-sm underline">
+                    Çıkış Yap
+                </button>
+            </div>
+
+            {/* PROFİL DÜZENLEME */}
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Profili Düzenle</h2>
+                {profile && (
+                    <form onSubmit={handleSaveProfile} className="space-y-3">
+
+                        <div className="flex items-center gap-4">
+                            {profile.avatar_url && (
+                                <img
+                                    src={profile.avatar_url}
+                                    alt="Avatar"
+                                    className="w-16 h-16 rounded-full object-cover"
+                                />
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarUpload}
+                                className="text-sm"
+                            />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Ad Soyad"
+                            value={profile.name ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, name: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Unvan"
+                            value={profile.title ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, title: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <textarea
+                            placeholder="Kısa açıklama"
+                            value={profile.bio ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, bio: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Rozet metni"
+                            value={profile.badge_text ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, badge_text: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="GitHub linki"
+                            value={profile.github_url ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, github_url: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="LinkedIn linki"
+                            value={profile.linkedin_url ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, linkedin_url: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="email"
+                            placeholder="E-posta"
+                            value={profile.email ?? ""}
+                            onChange={(e) =>
+                                setProfile({ ...profile, email: e.target.value })
+                            }
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <button
+                            type="submit"
+                            className="bg-black text-white rounded px-4 py-2"
+                        >
+                            Kaydet
+                        </button>
+                        {profileSaved && (
+                            <span className="ml-3 text-green-500 text-sm">Kaydedildi ✓</span>
+                        )}
+                    </form>
+                )}
+            </section>
+
+            {/* PROJE EKLEME */}
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Yeni Proje Ekle</h2>
+                <form onSubmit={handleAddProject} className="space-y-3">
+                    <input
+                        type="text"
+                        placeholder="Proje adı"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                        required
+                    />
+                    <textarea
+                        placeholder="Açıklama"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Proje linki (opsiyonel)"
+                        value={projectUrl}
+                        onChange={(e) => setProjectUrl(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <button
+                        type="submit"
+                        className="bg-black text-white rounded px-4 py-2"
+                    >
+                        Ekle
+                    </button>
+                </form>
+            </section>
+
+            {/* PROJE LİSTESİ */}
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Mevcut Projeler</h2>
+                <ul className="space-y-3">
+                    {projects.map((project) => (
+                        <li
+                            key={project.id}
+                            className="flex justify-between items-center border-b pb-2"
+                        >
+                            <div>
+                                <p className="font-medium">{project.title}</p>
+                                <p className="text-sm text-gray-500">{project.description}</p>
+                            </div>
+                            <button
+                                onClick={() => handleDelete(project.id)}
+                                className="text-red-500 text-sm underline"
+                            >
+                                Sil
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        </div>
+    );
+}
