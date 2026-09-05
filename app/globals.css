@@ -39,3 +39,7 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out both;
 }
+
+#egitim ul {
+  border-image: linear-gradient(to bottom, #818cf8, #a855f7) 1;
+}

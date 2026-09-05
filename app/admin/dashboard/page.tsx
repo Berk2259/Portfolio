@@ -13,6 +13,15 @@ type Project = {
     project_url: string | null;
 };
 
+type Education = {
+    id: string;
+    school: string;
+    degree: string | null;
+    start_year: string | null;
+    end_year: string | null;
+    description: string | null;
+};
+
 type Profile = {
     id: number;
     name: string | null;
@@ -32,9 +41,17 @@ export default function Dashboard() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [projectUrl, setProjectUrl] = useState("");
-
     const [profile, setProfile] = useState<Profile | null>(null);
     const [profileSaved, setProfileSaved] = useState(false);
+    const [educations, setEducations] = useState<Education[]>([]);
+    const [school, setSchool] = useState("");
+    const [degree, setDegree] = useState("");
+    const [startYear, setStartYear] = useState("");
+    const [endYear, setEndYear] = useState("");
+    const [eduDescription, setEduDescription] = useState("");
+    const [editingEducationId, setEditingEducationId] = useState<string | null>(
+        null
+    );
 
     const router = useRouter();
 
@@ -45,6 +62,7 @@ export default function Dashboard() {
             } else {
                 setUser(data.user);
                 loadProjects();
+                loadEducations();
                 loadProfile();
             }
             setLoading(false);
@@ -57,6 +75,14 @@ export default function Dashboard() {
             .select("*")
             .order("created_at", { ascending: false });
         setProjects(data ?? []);
+    }
+
+    async function loadEducations() {
+        const { data } = await supabase
+            .from("education")
+            .select("*")
+            .order("created_at", { ascending: false });
+        setEducations(data ?? []);
     }
 
     async function loadProfile() {
@@ -80,6 +106,62 @@ export default function Dashboard() {
     async function handleDelete(id: string) {
         await supabase.from("projects").delete().eq("id", id);
         loadProjects();
+    }
+
+    async function handleAddEducation(e: React.FormEvent) {
+        e.preventDefault();
+
+        if (editingEducationId) {
+            await supabase
+                .from("education")
+                .update({
+                    school,
+                    degree,
+                    start_year: startYear,
+                    end_year: endYear,
+                    description: eduDescription,
+                })
+                .eq("id", editingEducationId);
+            setEditingEducationId(null);
+        } else {
+            await supabase.from("education").insert({
+                school,
+                degree,
+                start_year: startYear,
+                end_year: endYear,
+                description: eduDescription,
+            });
+        }
+
+        setSchool("");
+        setDegree("");
+        setStartYear("");
+        setEndYear("");
+        setEduDescription("");
+        loadEducations();
+    }
+
+    function handleEditEducation(edu: Education) {
+        setEditingEducationId(edu.id);
+        setSchool(edu.school);
+        setDegree(edu.degree ?? "");
+        setStartYear(edu.start_year ?? "");
+        setEndYear(edu.end_year ?? "");
+        setEduDescription(edu.description ?? "");
+    }
+
+    function handleCancelEditEducation() {
+        setEditingEducationId(null);
+        setSchool("");
+        setDegree("");
+        setStartYear("");
+        setEndYear("");
+        setEduDescription("");
+    }
+
+    async function handleDeleteEducation(id: string) {
+        await supabase.from("education").delete().eq("id", id);
+        loadEducations();
     }
 
     async function handleSaveProfile(e: React.FormEvent) {
@@ -295,6 +377,100 @@ export default function Dashboard() {
                             >
                                 Sil
                             </button>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            <section>
+                <h2 className="text-xl font-semibold mb-4">
+                    {editingEducationId ? "Eğitimi Düzenle" : "Yeni Eğitim Ekle"}
+                </h2>
+                <form onSubmit={handleAddEducation} className="space-y-3">
+                    <input
+                        type="text"
+                        placeholder="Okul / Üniversite adı"
+                        value={school}
+                        onChange={(e) => setSchool(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder="Bölüm / Derece"
+                        value={degree}
+                        onChange={(e) => setDegree(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <div className="flex gap-3">
+                        <input
+                            type="text"
+                            placeholder="Başlangıç yılı"
+                            value={startYear}
+                            onChange={(e) => setStartYear(e.target.value)}
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Bitiş yılı"
+                            value={endYear}
+                            onChange={(e) => setEndYear(e.target.value)}
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                    </div>
+                    <textarea
+                        placeholder="Kısa açıklama (opsiyonel)"
+                        value={eduDescription}
+                        onChange={(e) => setEduDescription(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <div className="flex gap-3">
+                        <button
+                            type="submit"
+                            className="bg-black text-white rounded px-4 py-2"
+                        >
+                            {editingEducationId ? "Güncelle" : "Ekle"}
+                        </button>
+                        {editingEducationId && (
+                            <button
+                                type="button"
+                                onClick={handleCancelEditEducation}
+                                className="border rounded px-4 py-2"
+                            >
+                                İptal
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </section>
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Mevcut Eğitimler</h2>
+                <ul className="space-y-3">
+                    {educations.map((edu) => (
+                        <li
+                            key={edu.id}
+                            className="flex justify-between items-center border-b pb-2"
+                        >
+                            <div>
+                                <p className="font-medium">{edu.school}</p>
+                                <p className="text-sm text-gray-500">
+                                    {edu.degree} {edu.start_year && `• ${edu.start_year} - ${edu.end_year}`}
+                                </p>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => handleEditEducation(edu)}
+                                    className="text-blue-500 text-sm underline"
+                                >
+                                    Düzenle
+                                </button>
+                                <button
+                                    onClick={() => handleDeleteEducation(edu.id)}
+                                    className="text-red-500 text-sm underline"
+                                >
+                                    Sil
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>

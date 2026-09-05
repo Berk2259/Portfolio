@@ -6,6 +6,10 @@ export default async function Home() {
     .from("profile")
     .select("*")
     .single();
+  const { data: educations } = await supabase
+    .from("education")
+    .select("*")
+    .order("start_year", { ascending: false });
 
   return (
     <div>
@@ -100,13 +104,45 @@ export default async function Home() {
       </section>
 
       {/* DİĞER BÖLÜMLER */}
-      <div className="max-w-2xl mx-auto px-6 py-16 space-y-16">
-        <section id="hakkimda">
-          <h2 className="text-2xl font-semibold mb-4">Hakkımda</h2>
-          <p>
-            Burada kendinle ilgili 2-3 cümlelik kısa bir tanıtım yazacaksın:
-            kim olduğun, ne ile ilgilendiğin, neler yaptığın.
-          </p>
+      <div className="max-w-2xl px-6 md:pl-32 py-16 space-y-16">
+        <section id="egitim">
+          <h2 className="text-3xl font-semibold mb-8">Eğitim</h2>
+          <ul className="relative border-l-2 border-gradient-to-b space-y-10 pl-8">
+            {educations?.map((edu, i) => (
+              <li
+                key={edu.id}
+                className="relative group animate-fade-in-up"
+                style={{ animationDelay: `${i * 150}ms` }}
+              >
+                {/* nokta + parıltı */}
+                <span className="absolute -left-[41px] top-1">
+                  <span className="absolute inset-0 w-4 h-4 rounded-full bg-purple-500 blur-md opacity-60" />
+                  <span className="relative block w-4 h-4 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 ring-4 ring-black" />
+                </span>
+
+                <div className="rounded-xl p-4 -ml-4 transition-colors group-hover:bg-white/5">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h3 className="font-semibold text-lg">{edu.school}</h3>
+                    {edu.start_year && (
+                      <span className="text-sm text-indigo-300 border border-indigo-400/30 bg-indigo-400/10 rounded-full px-3 py-1">
+                        {edu.start_year} - {edu.end_year}
+                      </span>
+                    )}
+                  </div>
+                  {edu.degree && (
+                    <p className="text-gray-400 text-base mt-1">
+                      {edu.degree}
+                    </p>
+                  )}
+                  {edu.description && (
+                    <p className="text-gray-500 text-base mt-1">
+                      {edu.description}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section id="projeler">
