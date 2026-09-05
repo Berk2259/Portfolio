@@ -39,6 +39,22 @@ type Profile = {
     avatar_url: string | null;
 };
 
+type Experience = {
+    id: string;
+    company: string;
+    position: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    description: string | null;
+    work_type: string | null;
+};
+
+type ExperiencePhoto = {
+    id: string;
+    experience_id: string;
+    image_url: string;
+};
+
 export default function Dashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -58,6 +74,19 @@ export default function Dashboard() {
         null
     );
     const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
+    const [experiences, setExperiences] = useState<Experience[]>([]);
+    const [company, setCompany] = useState("");
+    const [position, setPosition] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [expDescription, setExpDescription] = useState("");
+    const [workType, setWorkType] = useState("");
+    const [editingExperienceId, setEditingExperienceId] = useState<
+        string | null
+    >(null);
+    const [experiencePhotos, setExperiencePhotos] = useState<ExperiencePhoto[]>(
+        []
+    );
 
     const router = useRouter();
 
@@ -70,6 +99,8 @@ export default function Dashboard() {
                 loadProjects();
                 loadEducations();
                 loadGallery();
+                loadExperiences();
+                loadExperiencePhotos();
                 loadProfile();
             }
             setLoading(false);
@@ -199,9 +230,118 @@ export default function Dashboard() {
         setEduDescription("");
     }
 
+    async function loadExperiences() {
+        const { data } = await supabase
+            .from("experience")
+            .select("*")
+            .order("created_at", { ascending: false });
+        setExperiences(data ?? []);
+    }
+
+    async function handleAddExperience(e: React.FormEvent) {
+        e.preventDefault();
+
+        if (editingExperienceId) {
+            await supabase
+                .from("experience")
+                .update({
+                    company,
+                    position,
+                    start_date: startDate,
+                    end_date: endDate,
+                    description: expDescription,
+                    work_type: workType,
+                })
+                .eq("id", editingExperienceId);
+            setEditingExperienceId(null);
+        } else {
+            await supabase.from("experience").insert({
+                company,
+                position,
+                start_date: startDate,
+                end_date: endDate,
+                description: expDescription,
+                work_type: workType,
+            });
+        }
+
+        setCompany("");
+        setPosition("");
+        setStartDate("");
+        setEndDate("");
+        setExpDescription("");
+        setWorkType("");
+        loadExperiences();
+    }
+
+    function handleEditExperience(exp: Experience) {
+        setEditingExperienceId(exp.id);
+        setCompany(exp.company);
+        setPosition(exp.position ?? "");
+        setStartDate(exp.start_date ?? "");
+        setEndDate(exp.end_date ?? "");
+        setExpDescription(exp.description ?? "");
+        setWorkType(exp.work_type ?? "");
+    }
+
+    function handleCancelEditExperience() {
+        setEditingExperienceId(null);
+        setCompany("");
+        setPosition("");
+        setStartDate("");
+        setEndDate("");
+        setExpDescription("");
+        setWorkType("");
+    }
+
+    async function handleDeleteExperience(id: string) {
+        await supabase.from("experience").delete().eq("id", id);
+        loadExperiences();
+    }
+
     async function handleDeleteEducation(id: string) {
         await supabase.from("education").delete().eq("id", id);
         loadEducations();
+    }
+
+    async function loadExperiencePhotos() {
+        const { data } = await supabase
+            .from("experience_photos")
+            .select("*")
+            .order("created_at", { ascending: true });
+        setExperiencePhotos(data ?? []);
+    }
+
+    async function handleUploadExperiencePhoto(
+        experienceId: string,
+        e: React.ChangeEvent<HTMLInputElement>
+    ) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const filePath = `exp-photo-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+        await supabase
+            .from("experience_photos")
+            .insert({ experience_id: experienceId, image_url: data.publicUrl });
+
+        loadExperiencePhotos();
+    }
+
+    async function handleDeleteExperiencePhoto(id: string) {
+        await supabase.from("experience_photos").delete().eq("id", id);
+        loadExperiencePhotos();
     }
 
     async function handleSaveProfile(e: React.FormEvent) {
@@ -537,6 +677,136 @@ export default function Dashboard() {
                             >
                                 ✕
                             </button>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+            <section>
+                <h2 className="text-xl font-semibold mb-4">
+                    {editingExperienceId ? "Deneyimi Düzenle" : "Yeni Deneyim Ekle"}
+                </h2>
+                <form onSubmit={handleAddExperience} className="space-y-3">
+                    <input
+                        type="text"
+                        placeholder="Şirket / Kurum adı"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder="Pozisyon"
+                        value={position}
+                        onChange={(e) => setPosition(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <select
+                        value={workType}
+                        onChange={(e) => setWorkType(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    >
+                        <option value="">Çalışma türü seç</option>
+                        <option value="Ofis">Ofis</option>
+                        <option value="Uzaktan">Uzaktan</option>
+                        <option value="Hibrit">Hibrit</option>
+                    </select>
+                    <div className="flex gap-3">
+                        <input
+                            type="text"
+                            placeholder="Başlangıç"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Bitiş"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className="w-full border rounded px-3 py-2 text-black bg-white"
+                        />
+                    </div>
+                    <textarea
+                        placeholder="Kısa açıklama (opsiyonel)"
+                        value={expDescription}
+                        onChange={(e) => setExpDescription(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <div className="flex gap-3">
+                        <button
+                            type="submit"
+                            className="bg-black text-white rounded px-4 py-2"
+                        >
+                            {editingExperienceId ? "Güncelle" : "Ekle"}
+                        </button>
+                        {editingExperienceId && (
+                            <button
+                                type="button"
+                                onClick={handleCancelEditExperience}
+                                className="border rounded px-4 py-2"
+                            >
+                                İptal
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </section>
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Mevcut Deneyimler</h2>
+                <ul className="space-y-3">
+                    {experiences.map((exp) => (
+                        <li key={exp.id} className="border-b pb-3">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="font-medium">{exp.company}</p>
+                                    <p className="text-sm text-gray-500">
+                                        {exp.position} {exp.work_type && `(${exp.work_type})`}{" "}
+                                        {exp.start_date &&
+                                            `• ${exp.start_date} - ${exp.end_date}`}
+                                    </p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleEditExperience(exp)}
+                                        className="text-blue-500 text-sm underline"
+                                    >
+                                        Düzenle
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteExperience(exp.id)}
+                                        className="text-red-500 text-sm underline"
+                                    >
+                                        Sil
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-2 flex items-center gap-3 flex-wrap">
+                                {experiencePhotos
+                                    .filter((p) => p.experience_id === exp.id)
+                                    .map((photo) => (
+                                        <div key={photo.id} className="relative">
+                                            <img
+                                                src={photo.image_url}
+                                                alt="Deneyim fotoğrafı"
+                                                className="w-16 h-16 object-cover rounded"
+                                            />
+                                            <button
+                                                onClick={() => handleDeleteExperiencePhoto(photo.id)}
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleUploadExperiencePhoto(exp.id, e)}
+                                    className="text-xs"
+                                />
+                            </div>
                         </li>
                     ))}
                 </ul>

@@ -20,7 +20,7 @@
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(180deg, #0a0a0a 0%, #120f1f 50%, #0a0a0a 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -30,6 +30,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -42,4 +43,146 @@ body {
 
 #egitim ul {
   border-image: linear-gradient(to bottom, #818cf8, #a855f7) 1;
+}
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 224px;
+  height: 224px;
+  border-radius: 50%;
+  border: 2px solid rgba(168, 130, 247, 0.5);
+  animation: pulse-ring 3s ease-out infinite;
+}
+
+@keyframes float-icon {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.tech-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease;
+  position: relative;
+  animation: float-icon 4s ease-in-out infinite;
+}
+
+.tech-badge:hover {
+  transform: scale(1.35) translateY(-4px) !important;
+  z-index: 50;
+  animation-play-state: paused;
+}
+
+.tech-tooltip {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.tech-badge:hover .tech-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.orbit-track {
+  position: absolute;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbit-icon-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.connector {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 1.5px;
+  transform-origin: left center;
+  opacity: 0.35;
+}
+
+.avatar-glow {
+  box-shadow: 0 0 70px 12px rgba(139, 92, 246, 0.4);
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-scroll 25s linear infinite;
 }

@@ -29,7 +29,7 @@ export default function PhotoStack({ photos }: { photos: Photo[] }) {
     return (
         <div
             onClick={() => setExpanded(!expanded)}
-            className="relative hidden md:block w-[850px] h-[850px] shrink-0 mt-4 cursor-pointer"
+            className="relative hidden md:block w-[700px] h-[700px] shrink-0 mt-4 cursor-pointer"
         >
             {photos.map((photo, i) => {
                 const pos = expanded
