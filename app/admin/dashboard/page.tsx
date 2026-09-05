@@ -22,6 +22,11 @@ type Education = {
     description: string | null;
 };
 
+type GalleryPhoto = {
+    id: string;
+    image_url: string;
+};
+
 type Profile = {
     id: number;
     name: string | null;
@@ -52,6 +57,7 @@ export default function Dashboard() {
     const [editingEducationId, setEditingEducationId] = useState<string | null>(
         null
     );
+    const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
 
     const router = useRouter();
 
@@ -63,6 +69,7 @@ export default function Dashboard() {
                 setUser(data.user);
                 loadProjects();
                 loadEducations();
+                loadGallery();
                 loadProfile();
             }
             setLoading(false);
@@ -83,6 +90,39 @@ export default function Dashboard() {
             .select("*")
             .order("created_at", { ascending: false });
         setEducations(data ?? []);
+    }
+    async function loadGallery() {
+        const { data } = await supabase
+            .from("gallery")
+            .select("*")
+            .order("created_at", { ascending: false });
+        setGallery(data ?? []);
+    }
+
+    async function handleAddGalleryPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const filePath = `gallery-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+        await supabase.from("gallery").insert({ image_url: data.publicUrl });
+        loadGallery();
+    }
+
+    async function handleDeleteGalleryPhoto(id: string) {
+        await supabase.from("gallery").delete().eq("id", id);
+        loadGallery();
     }
 
     async function loadProfile() {
@@ -471,6 +511,32 @@ export default function Dashboard() {
                                     Sil
                                 </button>
                             </div>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Galeri Fotoğrafları</h2>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAddGalleryPhoto}
+                    className="text-sm mb-4"
+                />
+                <ul className="flex flex-wrap gap-4">
+                    {gallery.map((photo) => (
+                        <li key={photo.id} className="relative">
+                            <img
+                                src={photo.image_url}
+                                alt="Galeri fotoğrafı"
+                                className="w-24 h-24 object-cover rounded"
+                            />
+                            <button
+                                onClick={() => handleDeleteGalleryPhoto(photo.id)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs"
+                            >
+                                ✕
+                            </button>
                         </li>
                     ))}
                 </ul>
