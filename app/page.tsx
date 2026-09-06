@@ -25,6 +25,10 @@ export default async function Home() {
     .from("experience_photos")
     .select("*")
     .order("created_at", { ascending: true });
+  const { data: skills } = await supabase
+    .from("skills")
+    .select("*")
+    .order("created_at", { ascending: true });
 
   return (
     <div>
@@ -55,7 +59,7 @@ export default async function Home() {
           />
         </svg>
 
-        <TechFloat />
+        <TechFloat skills={skills ?? []} />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-16 px-6 md:pl-50 max-w-10xl text-center md:text-left">
           <div className="relative shrink-0 animate-fade-in-up">

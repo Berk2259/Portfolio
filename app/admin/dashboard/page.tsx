@@ -55,6 +55,12 @@ type ExperiencePhoto = {
     image_url: string;
 };
 
+type Skill = {
+    id: string;
+    name: string;
+    logo_url: string | null;
+};
+
 export default function Dashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -87,6 +93,8 @@ export default function Dashboard() {
     const [experiencePhotos, setExperiencePhotos] = useState<ExperiencePhoto[]>(
         []
     );
+    const [skills, setSkills] = useState<Skill[]>([]);
+    const [skillName, setSkillName] = useState("");
 
     const router = useRouter();
 
@@ -102,6 +110,7 @@ export default function Dashboard() {
                 loadExperiences();
                 loadExperiencePhotos();
                 loadProfile();
+                loadSkills();
             }
             setLoading(false);
         });
@@ -312,6 +321,8 @@ export default function Dashboard() {
         setExperiencePhotos(data ?? []);
     }
 
+
+
     async function handleUploadExperiencePhoto(
         experienceId: string,
         e: React.ChangeEvent<HTMLInputElement>
@@ -337,6 +348,47 @@ export default function Dashboard() {
             .insert({ experience_id: experienceId, image_url: data.publicUrl });
 
         loadExperiencePhotos();
+    }
+
+    async function loadSkills() {
+        const { data } = await supabase
+            .from("skills")
+            .select("*")
+            .order("created_at", { ascending: true });
+        setSkills(data ?? []);
+    }
+
+    async function handleAddSkill(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file || !skillName.trim()) {
+            alert("Önce yetenek adını yaz, sonra logo dosyasını seç.");
+            return;
+        }
+
+        const filePath = `skill-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+        await supabase
+            .from("skills")
+            .insert({ name: skillName, logo_url: data.publicUrl });
+
+        setSkillName("");
+        loadSkills();
+    }
+
+    async function handleDeleteSkill(id: string) {
+        await supabase.from("skills").delete().eq("id", id);
+        loadSkills();
     }
 
     async function handleDeleteExperiencePhoto(id: string) {
@@ -811,6 +863,45 @@ export default function Dashboard() {
                     ))}
                 </ul>
             </section>
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Yetenek/Teknoloji Ekle</h2>
+                <div className="space-y-3">
+                    <input
+                        type="text"
+                        placeholder="Teknoloji adı (örn: React)"
+                        value={skillName}
+                        onChange={(e) => setSkillName(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAddSkill}
+                        className="text-sm"
+                    />
+                </div>
+                <ul className="flex flex-wrap gap-4 mt-4">
+                    {skills.map((skill) => (
+                        <li key={skill.id} className="relative flex flex-col items-center gap-1">
+                            {skill.logo_url && (
+                                <img
+                                    src={skill.logo_url}
+                                    alt={skill.name}
+                                    className="w-14 h-14 object-contain rounded-lg bg-white p-2"
+                                />
+                            )}
+                            <span className="text-xs">{skill.name}</span>
+                            <button
+                                onClick={() => handleDeleteSkill(skill.id)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                            >
+                                ✕
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
         </div>
     );
 }
