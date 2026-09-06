@@ -11,6 +11,8 @@ type Project = {
     description: string | null;
     image_url: string | null;
     project_url: string | null;
+    tech_stack: string | null;
+    github_url: string | null;
 };
 
 type Education = {
@@ -95,6 +97,12 @@ export default function Dashboard() {
     );
     const [skills, setSkills] = useState<Skill[]>([]);
     const [skillName, setSkillName] = useState("");
+    const [projectImageUrl, setProjectImageUrl] = useState("");
+    const [editingProjectId, setEditingProjectId] = useState<string | null>(
+        null
+    );
+    const [techStack, setTechStack] = useState("");
+    const [projectGithubUrl, setProjectGithubUrl] = useState("");
 
     const router = useRouter();
 
@@ -172,20 +180,84 @@ export default function Dashboard() {
 
     async function handleAddProject(e: React.FormEvent) {
         e.preventDefault();
-        await supabase.from("projects").insert({
-            title,
-            description,
-            project_url: projectUrl,
-        });
+
+        if (editingProjectId) {
+            await supabase
+                .from("projects")
+                .update({
+                    title,
+                    description,
+                    project_url: projectUrl,
+                    image_url: projectImageUrl,
+                    tech_stack: techStack,
+                    github_url: projectGithubUrl,
+                })
+                .eq("id", editingProjectId);
+            setEditingProjectId(null);
+        } else {
+            await supabase.from("projects").insert({
+                title,
+                description,
+                project_url: projectUrl,
+                image_url: projectImageUrl,
+                tech_stack: techStack,
+                github_url: projectGithubUrl,
+            });
+        }
+
         setTitle("");
         setDescription("");
         setProjectUrl("");
+        setProjectImageUrl("");
+        setTechStack("");
+        setProjectGithubUrl("");
         loadProjects();
+    }
+
+    function handleEditProject(project: Project) {
+        setEditingProjectId(project.id);
+        setTitle(project.title);
+        setDescription(project.description ?? "");
+        setProjectUrl(project.project_url ?? "");
+        setProjectImageUrl(project.image_url ?? "");
+        setTechStack(project.tech_stack ?? "");
+        setProjectGithubUrl(project.github_url ?? "");
+    }
+
+    function handleCancelEditProject() {
+        setEditingProjectId(null);
+        setTitle("");
+        setDescription("");
+        setProjectUrl("");
+        setProjectImageUrl("");
+        setTechStack("");
+        setProjectGithubUrl("");
     }
 
     async function handleDelete(id: string) {
         await supabase.from("projects").delete().eq("id", id);
         loadProjects();
+    }
+
+    async function handleProjectImageUpload(
+        e: React.ChangeEvent<HTMLInputElement>
+    ) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const filePath = `project-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        setProjectImageUrl(data.publicUrl);
     }
 
     async function handleAddEducation(e: React.FormEvent) {
@@ -558,7 +630,9 @@ export default function Dashboard() {
 
             {/* PROJE EKLEME */}
             <section>
-                <h2 className="text-xl font-semibold mb-4">Yeni Proje Ekle</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                    {editingProjectId ? "Projeyi Düzenle" : "Yeni Proje Ekle"}
+                </h2>
                 <form onSubmit={handleAddProject} className="space-y-3">
                     <input
                         type="text"
@@ -581,12 +655,52 @@ export default function Dashboard() {
                         onChange={(e) => setProjectUrl(e.target.value)}
                         className="w-full border rounded px-3 py-2 text-black bg-white"
                     />
-                    <button
-                        type="submit"
-                        className="bg-black text-white rounded px-4 py-2"
-                    >
-                        Ekle
-                    </button>
+                    <input
+                        type="text"
+                        placeholder="GitHub linki (opsiyonel)"
+                        value={projectGithubUrl}
+                        onChange={(e) => setProjectGithubUrl(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Kullanılan teknolojiler (virgülle ayır: React, Flutter, PostgreSQL)"
+                        value={techStack}
+                        onChange={(e) => setTechStack(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <div className="flex items-center gap-4">
+                        {projectImageUrl && (
+                            <img
+                                src={projectImageUrl}
+                                alt="Proje görseli"
+                                className="w-20 h-20 rounded object-cover"
+                            />
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleProjectImageUpload}
+                            className="text-sm"
+                        />
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            type="submit"
+                            className="bg-black text-white rounded px-4 py-2"
+                        >
+                            {editingProjectId ? "Güncelle" : "Ekle"}
+                        </button>
+                        {editingProjectId && (
+                            <button
+                                type="button"
+                                onClick={handleCancelEditProject}
+                                className="border rounded px-4 py-2"
+                            >
+                                İptal
+                            </button>
+                        )}
+                    </div>
                 </form>
             </section>
 
@@ -599,16 +713,33 @@ export default function Dashboard() {
                             key={project.id}
                             className="flex justify-between items-center border-b pb-2"
                         >
-                            <div>
-                                <p className="font-medium">{project.title}</p>
-                                <p className="text-sm text-gray-500">{project.description}</p>
+                            <div className="flex items-center gap-3">
+                                {project.image_url && (
+                                    <img
+                                        src={project.image_url}
+                                        alt={project.title}
+                                        className="w-12 h-12 rounded object-cover"
+                                    />
+                                )}
+                                <div>
+                                    <p className="font-medium">{project.title}</p>
+                                    <p className="text-sm text-gray-500">{project.description}</p>
+                                </div>
                             </div>
-                            <button
-                                onClick={() => handleDelete(project.id)}
-                                className="text-red-500 text-sm underline"
-                            >
-                                Sil
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => handleEditProject(project)}
+                                    className="text-blue-500 text-sm underline"
+                                >
+                                    Düzenle
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(project.id)}
+                                    className="text-red-500 text-sm underline"
+                                >
+                                    Sil
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>
