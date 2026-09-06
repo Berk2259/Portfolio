@@ -11,6 +11,9 @@ type Project = {
     github_url?: string | null;
     tech_stack?: string | null;
     terminal_log?: string | null;
+    terminal_build_cmd?: string | null;
+    terminal_second_cmd?: string | null;
+    terminal_second_log?: string | null;
 };
 
 type ProjectPhoto = {
@@ -45,17 +48,35 @@ function buildSegments(project: Project, os: "mac" | "win"): Segment[] {
             .map((t) => t.trim())
             .filter((t) => t.length > 0) ?? [];
 
+    const buildCmd = project.terminal_build_cmd?.trim() || "npm run build";
+
     const seg: Segment[] = [];
     seg.push({ text: prompt, cls: "text-emerald-400 font-bold" });
-    seg.push({ text: `npm run build\n`, cls: "" });
+    seg.push({ text: `${buildCmd}\n`, cls: "" });
 
     const commitLines = bullets.length > 0 ? bullets : [project.title];
     commitLines.forEach((line) => {
-        seg.push({ text: "✓ ", cls: "text-emerald-400 font-bold" });
         seg.push({ text: line + "\n", cls: "" });
     });
     seg.push({ text: "\n", cls: "" });
 
+    if (project.terminal_second_cmd?.trim()) {
+        seg.push({ text: "\n", cls: "" });
+        seg.push({ text: prompt, cls: "text-emerald-400 font-bold" });
+        seg.push({ text: project.terminal_second_cmd.trim() + "\n", cls: "" });
+
+        const secondLines =
+            project.terminal_second_log
+                ?.split("\n")
+                .map((l) => l.trim())
+                .filter((l) => l.length > 0) ?? [];
+
+        secondLines.forEach((line) => {
+            seg.push({ text: line + "\n", cls: "" });
+        });
+    }
+
+    seg.push({ text: "\n", cls: "" });
     seg.push({ text: prompt, cls: "text-emerald-400 font-bold" });
     seg.push({ text: catCmd + "\n", cls: "" });
     seg.push({ text: "> proje: ", cls: "text-zinc-500" });
@@ -99,53 +120,6 @@ function Terminal({ project, title }: { project: Project; title: string }) {
     const [progressStep, setProgressStep] = useState(0);
     const [revealed, setRevealed] = useState(0);
 
-    const [cmdInput, setCmdInput] = useState("");
-    const [history, setHistory] = useState<
-        { cmd: string; output: string; isError?: boolean }[]
-    >([]);
-
-    const commandResponses: Record<string, string> = {
-        help: "Kullanılabilir komutlar:\n  help     - bu listeyi gösterir\n  about    - benim hakkımda\n  contact  - iletişim bilgisi\n  whoami   - sen kimsin bakalım\n  clear    - ekranı temizler",
-        about:
-            "Bilgisayar Mühendisliği öğrencisiyim, mobil ve web geliştirme ile ilgileniyorum.",
-        contact: "Bu projeyi beğendiysen bana ulaş 👋",
-        whoami:
-            "bir ziyaretçisin... ama buraya kadar gelip komut yazdığına göre meraklı birine benziyorsun 😄",
-    };
-
-    function runCommand(raw: string) {
-        const cmd = raw.trim();
-        if (!cmd) return;
-
-        if (cmd === "clear") {
-            setHistory([]);
-            return;
-        }
-        if (cmd.startsWith("sudo")) {
-            setHistory((h) => [
-                ...h,
-                {
-                    cmd,
-                    output: "İzin reddedildi: bu bir portfolyo, root yetkisi yok 😅",
-                    isError: true,
-                },
-            ]);
-            return;
-        }
-        if (commandResponses[cmd]) {
-            setHistory((h) => [...h, { cmd, output: commandResponses[cmd] }]);
-            return;
-        }
-        setHistory((h) => [
-            ...h,
-            {
-                cmd,
-                output: `command not found: ${cmd} — 'help' yazarak komutları görebilirsin`,
-                isError: true,
-            },
-        ]);
-    }
-
     const segments = buildSegments(project, os);
     const flatChars: { ch: string; segIdx: number }[] = [];
     segments.forEach((seg, si) => {
@@ -160,7 +134,6 @@ function Terminal({ project, title }: { project: Project; title: string }) {
             setSpinnerIdx(0);
             setProgressStep(0);
             setRevealed(0);
-            setHistory([]);
 
             const spinnerStart = Date.now();
             while (Date.now() - spinnerStart < 900) {
@@ -200,6 +173,7 @@ function Terminal({ project, title }: { project: Project; title: string }) {
         project.title.toLowerCase().replace(/[^a-z0-9ığüşöç]+/gi, "_").slice(0, 24) +
         (os === "win" ? ".config" : ".log");
     const prompt = os === "win" ? "PS C:\\Projects> " : "$ ";
+    const buildCmd = project.terminal_build_cmd?.trim() || "npm run build";
     const { filled, empty, pct } = progressBar(progressStep);
 
     let remaining = revealed;
@@ -260,7 +234,8 @@ function Terminal({ project, title }: { project: Project; title: string }) {
                     {phase === "spinner" && (
                         <>
                             <span className="text-emerald-400 font-bold">{prompt}</span>
-                            npm run build{"\n"}
+                            {buildCmd}
+                            {"\n"}
                             <span className="text-yellow-400">
                                 {SPINNER_FRAMES[spinnerIdx % SPINNER_FRAMES.length]}
                             </span>{" "}
@@ -271,7 +246,8 @@ function Terminal({ project, title }: { project: Project; title: string }) {
                     {phase === "progress" && (
                         <>
                             <span className="text-emerald-400 font-bold">{prompt}</span>
-                            npm run build{"\n"}
+                            {buildCmd}
+                            {"\n"}
                             <span
                                 className="text-purple-400 inline-block whitespace-nowrap"
                                 style={{ fontVariantNumeric: "tabular-nums" }}
@@ -286,7 +262,8 @@ function Terminal({ project, title }: { project: Project; title: string }) {
                     {(phase === "typing" || phase === "done") && (
                         <>
                             <span className="text-emerald-400 font-bold">{prompt}</span>
-                            npm run build{"\n"}
+                            {buildCmd}
+                            {"\n"}
                             <span
                                 className="text-purple-400 inline-block whitespace-nowrap"
                                 style={{ fontVariantNumeric: "tabular-nums" }}
@@ -308,46 +285,6 @@ function Terminal({ project, title }: { project: Project; title: string }) {
                                     </span>
                                 );
                             })}
-
-                            {phase === "done" && (
-                                <>
-                                    {history.map((h, i) => (
-                                        <div key={i}>
-                                            {"\n"}
-                                            <span className="text-emerald-400 font-bold">
-                                                {prompt}
-                                            </span>
-                                            {h.cmd}
-                                            {"\n"}
-                                            <span
-                                                className={
-                                                    h.isError ? "text-red-400" : "text-violet-300"
-                                                }
-                                            >
-                                                {h.output}
-                                            </span>
-                                        </div>
-                                    ))}
-                                    <div className="flex items-center mt-1">
-                                        <span className="text-emerald-400 font-bold">
-                                            {prompt}
-                                        </span>
-                                        <input
-                                            value={cmdInput}
-                                            onChange={(e) => setCmdInput(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                    runCommand(cmdInput);
-                                                    setCmdInput("");
-                                                }
-                                            }}
-                                            autoComplete="off"
-                                            spellCheck={false}
-                                            className="flex-1 bg-transparent outline-none text-zinc-300 font-mono text-[13px] ml-1"
-                                        />
-                                    </div>
-                                </>
-                            )}
                         </>
                     )}
 

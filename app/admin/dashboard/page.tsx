@@ -14,6 +14,9 @@ type Project = {
     tech_stack: string | null;
     github_url: string | null;
     terminal_log: string | null;
+    terminal_build_cmd: string | null;
+    terminal_second_cmd: string | null;
+    terminal_second_log: string | null;
 };
 
 type Education = {
@@ -112,6 +115,9 @@ export default function Dashboard() {
     const [projectGithubUrl, setProjectGithubUrl] = useState("");
     const [projectPhotos, setProjectPhotos] = useState<ProjectPhoto[]>([]);
     const [terminalLog, setTerminalLog] = useState("");
+    const [terminalBuildCmd, setTerminalBuildCmd] = useState("");
+    const [terminalSecondCmd, setTerminalSecondCmd] = useState("");
+    const [terminalSecondLog, setTerminalSecondLog] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -201,6 +207,9 @@ export default function Dashboard() {
                     tech_stack: techStack,
                     github_url: projectGithubUrl,
                     terminal_log: terminalLog,
+                    terminal_build_cmd: terminalBuildCmd,
+                    terminal_second_cmd: terminalSecondCmd,
+                    terminal_second_log: terminalSecondLog,
                 })
                 .eq("id", editingProjectId);
             setEditingProjectId(null);
@@ -213,6 +222,9 @@ export default function Dashboard() {
                 tech_stack: techStack,
                 github_url: projectGithubUrl,
                 terminal_log: terminalLog,
+                terminal_build_cmd: terminalBuildCmd,
+                terminal_second_cmd: terminalSecondCmd,
+                terminal_second_log: terminalSecondLog,
             });
         }
 
@@ -222,6 +234,10 @@ export default function Dashboard() {
         setProjectImageUrl("");
         setTechStack("");
         setProjectGithubUrl("");
+        setTerminalLog("");
+        setTerminalBuildCmd("");
+        setTerminalSecondCmd("");
+        setTerminalSecondLog("");
         loadProjects();
     }
 
@@ -233,6 +249,10 @@ export default function Dashboard() {
         setProjectImageUrl(project.image_url ?? "");
         setTechStack(project.tech_stack ?? "");
         setProjectGithubUrl(project.github_url ?? "");
+        setTerminalBuildCmd(project.terminal_build_cmd ?? "");
+        setTerminalLog(project.terminal_log ?? "");
+        setTerminalSecondCmd(project.terminal_second_cmd ?? "");
+        setTerminalSecondLog(project.terminal_second_log ?? "");
     }
 
     function handleCancelEditProject() {
@@ -243,6 +263,10 @@ export default function Dashboard() {
         setProjectImageUrl("");
         setTechStack("");
         setProjectGithubUrl("");
+        setTerminalLog("");
+        setTerminalBuildCmd("");
+        setTerminalSecondCmd("");
+        setTerminalSecondLog("");
     }
 
     async function handleDelete(id: string) {
@@ -444,8 +468,6 @@ export default function Dashboard() {
         loadProjectPhotos();
     }
 
-
-
     async function handleUploadExperiencePhoto(
         experienceId: string,
         e: React.ChangeEvent<HTMLInputElement>
@@ -539,20 +561,10 @@ export default function Dashboard() {
         setTimeout(() => setProfileSaved(false), 2000);
     }
 
-
     async function handleLogout() {
         await supabase.auth.signOut();
         router.push("/admin");
     }
-
-    if (loading) {
-        return <p className="p-6">Yükleniyor...</p>;
-    }
-
-    if (!user) {
-        return null;
-    }
-
 
     async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -574,6 +586,14 @@ export default function Dashboard() {
         setProfile({ ...profile, avatar_url: data.publicUrl });
     }
 
+    if (loading) {
+        return <p className="p-6">Yükleniyor...</p>;
+    }
+
+    if (!user) {
+        return null;
+    }
+
     return (
         <div className="max-w-2xl mx-auto px-6 py-16 space-y-12">
             <div className="flex justify-between items-center">
@@ -588,7 +608,6 @@ export default function Dashboard() {
                 <h2 className="text-xl font-semibold mb-4">Profili Düzenle</h2>
                 {profile && (
                     <form onSubmit={handleSaveProfile} className="space-y-3">
-
                         <div className="flex items-center gap-4">
                             {profile.avatar_url && (
                                 <img
@@ -713,10 +732,38 @@ export default function Dashboard() {
                         onChange={(e) => setProjectGithubUrl(e.target.value)}
                         className="w-full border rounded px-3 py-2 text-black bg-white"
                     />
+                    <input
+                        type="text"
+                        placeholder="Kullanılan teknolojiler (virgülle ayır: React, Flutter, PostgreSQL)"
+                        value={techStack}
+                        onChange={(e) => setTechStack(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Terminal komutu (boş bırakırsan: npm run build)"
+                        value={terminalBuildCmd}
+                        onChange={(e) => setTerminalBuildCmd(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
                     <textarea
                         placeholder={"Terminal içeriği (her satır ayrı komut olur)\nÖrn:\ncoin ekonomisi dengelendi\nçoklu oyuncu görev sistemi eklendi"}
                         value={terminalLog}
                         onChange={(e) => setTerminalLog(e.target.value)}
+                        rows={4}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <input
+                        type="text"
+                        placeholder="2. terminal komutu (opsiyonel, örn: flutter run)"
+                        value={terminalSecondCmd}
+                        onChange={(e) => setTerminalSecondCmd(e.target.value)}
+                        className="w-full border rounded px-3 py-2 text-black bg-white"
+                    />
+                    <textarea
+                        placeholder={"2. terminal içeriği (opsiyonel, her satır ayrı satır olur)"}
+                        value={terminalSecondLog}
+                        onChange={(e) => setTerminalSecondLog(e.target.value)}
                         rows={4}
                         className="w-full border rounded px-3 py-2 text-black bg-white"
                     />
@@ -1108,7 +1155,6 @@ export default function Dashboard() {
                     ))}
                 </ul>
             </section>
-
         </div>
     );
 }
