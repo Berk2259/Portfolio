@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import PhotoStack from "./PhotoStack";
 import ExperiencePhoto from "./ExperiencePhoto";
 import TechFloat from "./TechFloat";
+import ProjectsShowcase from "./ProjectsShowcase";
 
 export default async function Home() {
   const { data: projects } = await supabase.from("projects").select("*");
@@ -27,6 +28,10 @@ export default async function Home() {
     .order("created_at", { ascending: true });
   const { data: skills } = await supabase
     .from("skills")
+    .select("*")
+    .order("created_at", { ascending: true });
+  const { data: projectPhotos } = await supabase
+    .from("project_photos")
     .select("*")
     .order("created_at", { ascending: true });
 
@@ -309,72 +314,10 @@ export default async function Home() {
 
         <section id="projeler">
           <h2 className="text-3xl font-semibold mb-8">Projeler</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects?.map((project) => (
-              <div
-                key={project.id}
-                className="group rounded-xl overflow-hidden bg-white/5 border border-white/10 transition-all hover:border-white/30 hover:-translate-y-1"
-              >
-                {project.image_url ? (
-                  <img
-                    src={project.image_url}
-                    alt={project.title}
-                    className="w-full h-40 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-indigo-500/30 to-purple-600/30 flex items-center justify-center text-white/40 text-sm">
-                    Görsel yok
-                  </div>
-                )}
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg">{project.title}</h3>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {project.description}
-                  </p>
-
-                  {project.tech_stack && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {project.tech_stack
-                        .split(",")
-                        .map((t: string) => t.trim())
-                        .filter((t: string) => t.length > 0)
-                        .map((tag: string) => (
-                          <span
-                            key={tag}
-                            className="text-xs text-indigo-300 border border-indigo-400/30 bg-indigo-400/10 rounded-full px-2 py-0.5"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                    </div>
-                  )}
-
-                  <div className="flex gap-4 mt-3">
-                    {project.project_url && (
-                      <a
-                        href={project.project_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-indigo-300 hover:text-indigo-200 underline"
-                      >
-                        Canlı Gör →
-                      </a>
-                    )}
-                    {project.github_url && (
-                      <a
-                        href={project.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-white/70 hover:text-white underline"
-                      >
-                        GitHub →
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ProjectsShowcase
+            projects={projects ?? []}
+            projectPhotos={projectPhotos ?? []}
+          />
         </section>
 
         <section id="iletisim">

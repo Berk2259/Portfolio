@@ -13,6 +13,7 @@ type Project = {
     project_url: string | null;
     tech_stack: string | null;
     github_url: string | null;
+    terminal_log: string | null;
 };
 
 type Education = {
@@ -63,6 +64,12 @@ type Skill = {
     logo_url: string | null;
 };
 
+type ProjectPhoto = {
+    id: string;
+    project_id: string;
+    image_url: string;
+};
+
 export default function Dashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -103,7 +110,8 @@ export default function Dashboard() {
     );
     const [techStack, setTechStack] = useState("");
     const [projectGithubUrl, setProjectGithubUrl] = useState("");
-
+    const [projectPhotos, setProjectPhotos] = useState<ProjectPhoto[]>([]);
+    const [terminalLog, setTerminalLog] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -119,6 +127,7 @@ export default function Dashboard() {
                 loadExperiencePhotos();
                 loadProfile();
                 loadSkills();
+                loadProjectPhotos();
             }
             setLoading(false);
         });
@@ -191,6 +200,7 @@ export default function Dashboard() {
                     image_url: projectImageUrl,
                     tech_stack: techStack,
                     github_url: projectGithubUrl,
+                    terminal_log: terminalLog,
                 })
                 .eq("id", editingProjectId);
             setEditingProjectId(null);
@@ -202,6 +212,7 @@ export default function Dashboard() {
                 image_url: projectImageUrl,
                 tech_stack: techStack,
                 github_url: projectGithubUrl,
+                terminal_log: terminalLog,
             });
         }
 
@@ -391,6 +402,46 @@ export default function Dashboard() {
             .select("*")
             .order("created_at", { ascending: true });
         setExperiencePhotos(data ?? []);
+    }
+
+    async function loadProjectPhotos() {
+        const { data } = await supabase
+            .from("project_photos")
+            .select("*")
+            .order("created_at", { ascending: true });
+        setProjectPhotos(data ?? []);
+    }
+
+    async function handleUploadProjectPhoto(
+        projectId: string,
+        e: React.ChangeEvent<HTMLInputElement>
+    ) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const filePath = `project-photo-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+        await supabase
+            .from("project_photos")
+            .insert({ project_id: projectId, image_url: data.publicUrl });
+
+        loadProjectPhotos();
+    }
+
+    async function handleDeleteProjectPhoto(id: string) {
+        await supabase.from("project_photos").delete().eq("id", id);
+        loadProjectPhotos();
     }
 
 
@@ -662,11 +713,11 @@ export default function Dashboard() {
                         onChange={(e) => setProjectGithubUrl(e.target.value)}
                         className="w-full border rounded px-3 py-2 text-black bg-white"
                     />
-                    <input
-                        type="text"
-                        placeholder="Kullanılan teknolojiler (virgülle ayır: React, Flutter, PostgreSQL)"
-                        value={techStack}
-                        onChange={(e) => setTechStack(e.target.value)}
+                    <textarea
+                        placeholder={"Terminal içeriği (her satır ayrı komut olur)\nÖrn:\ncoin ekonomisi dengelendi\nçoklu oyuncu görev sistemi eklendi"}
+                        value={terminalLog}
+                        onChange={(e) => setTerminalLog(e.target.value)}
+                        rows={4}
                         className="w-full border rounded px-3 py-2 text-black bg-white"
                     />
                     <div className="flex items-center gap-4">
@@ -709,36 +760,61 @@ export default function Dashboard() {
                 <h2 className="text-xl font-semibold mb-4">Mevcut Projeler</h2>
                 <ul className="space-y-3">
                     {projects.map((project) => (
-                        <li
-                            key={project.id}
-                            className="flex justify-between items-center border-b pb-2"
-                        >
-                            <div className="flex items-center gap-3">
-                                {project.image_url && (
-                                    <img
-                                        src={project.image_url}
-                                        alt={project.title}
-                                        className="w-12 h-12 rounded object-cover"
-                                    />
-                                )}
-                                <div>
-                                    <p className="font-medium">{project.title}</p>
-                                    <p className="text-sm text-gray-500">{project.description}</p>
+                        <li key={project.id} className="border-b pb-3">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    {project.image_url && (
+                                        <img
+                                            src={project.image_url}
+                                            alt={project.title}
+                                            className="w-12 h-12 rounded object-cover"
+                                        />
+                                    )}
+                                    <div>
+                                        <p className="font-medium">{project.title}</p>
+                                        <p className="text-sm text-gray-500">{project.description}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleEditProject(project)}
+                                        className="text-blue-500 text-sm underline"
+                                    >
+                                        Düzenle
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(project.id)}
+                                        className="text-red-500 text-sm underline"
+                                    >
+                                        Sil
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => handleEditProject(project)}
-                                    className="text-blue-500 text-sm underline"
-                                >
-                                    Düzenle
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(project.id)}
-                                    className="text-red-500 text-sm underline"
-                                >
-                                    Sil
-                                </button>
+
+                            <div className="mt-2 flex items-center gap-3 flex-wrap">
+                                {projectPhotos
+                                    .filter((p) => p.project_id === project.id)
+                                    .map((photo) => (
+                                        <div key={photo.id} className="relative">
+                                            <img
+                                                src={photo.image_url}
+                                                alt="Proje fotoğrafı"
+                                                className="w-16 h-16 object-cover rounded"
+                                            />
+                                            <button
+                                                onClick={() => handleDeleteProjectPhoto(photo.id)}
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleUploadProjectPhoto(project.id, e)}
+                                    className="text-xs"
+                                />
                             </div>
                         </li>
                     ))}
