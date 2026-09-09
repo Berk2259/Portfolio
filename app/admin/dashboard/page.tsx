@@ -53,6 +53,7 @@ type Experience = {
     end_date: string | null;
     description: string | null;
     work_type: string | null;
+    highlight: string | null;
 };
 
 type ExperiencePhoto = {
@@ -138,12 +139,17 @@ export default function Dashboard() {
     const [endDate, setEndDate] = useState("");
     const [expDescription, setExpDescription] = useState("");
     const [workType, setWorkType] = useState("");
+    const [expHighlight, setExpHighlight] = useState("");
     const [editingExperienceId, setEditingExperienceId] = useState<
         string | null
     >(null);
     const [experiencePhotos, setExperiencePhotos] = useState<ExperiencePhoto[]>(
         []
     );
+    const [experienceSkills, setExperienceSkills] = useState<
+        { id: string; experience_id: string; skill_id: string }[]
+    >([]);
+    const [selectedExpSkillIds, setSelectedExpSkillIds] = useState<string[]>([]);
     const [skills, setSkills] = useState<Skill[]>([]);
     const [skillName, setSkillName] = useState("");
     const [projectImageUrl, setProjectImageUrl] = useState("");
@@ -170,6 +176,7 @@ export default function Dashboard() {
                 loadGallery();
                 loadExperiences();
                 loadExperiencePhotos();
+                loadExperienceSkills();
                 loadProfile();
                 loadSkills();
                 loadProjectPhotos();
@@ -396,6 +403,8 @@ export default function Dashboard() {
     async function handleAddExperience(e: React.FormEvent) {
         e.preventDefault();
 
+        let experienceId = editingExperienceId;
+
         if (editingExperienceId) {
             await supabase
                 .from("experience")
@@ -406,18 +415,41 @@ export default function Dashboard() {
                     end_date: endDate,
                     description: expDescription,
                     work_type: workType,
+                    highlight: expHighlight,
                 })
                 .eq("id", editingExperienceId);
             setEditingExperienceId(null);
         } else {
-            await supabase.from("experience").insert({
-                company,
-                position,
-                start_date: startDate,
-                end_date: endDate,
-                description: expDescription,
-                work_type: workType,
-            });
+            const { data } = await supabase
+                .from("experience")
+                .insert({
+                    company,
+                    position,
+                    start_date: startDate,
+                    end_date: endDate,
+                    description: expDescription,
+                    work_type: workType,
+                    highlight: expHighlight,
+                })
+                .select()
+                .single();
+            experienceId = data?.id ?? null;
+        }
+
+        if (experienceId) {
+            await supabase
+                .from("experience_skills")
+                .delete()
+                .eq("experience_id", experienceId);
+
+            if (selectedExpSkillIds.length > 0) {
+                await supabase.from("experience_skills").insert(
+                    selectedExpSkillIds.map((skillId) => ({
+                        experience_id: experienceId,
+                        skill_id: skillId,
+                    }))
+                );
+            }
         }
 
         setCompany("");
@@ -426,7 +458,10 @@ export default function Dashboard() {
         setEndDate("");
         setExpDescription("");
         setWorkType("");
+        setExpHighlight("");
+        setSelectedExpSkillIds([]);
         loadExperiences();
+        loadExperienceSkills();
     }
 
     function handleEditExperience(exp: Experience) {
@@ -437,6 +472,12 @@ export default function Dashboard() {
         setEndDate(exp.end_date ?? "");
         setExpDescription(exp.description ?? "");
         setWorkType(exp.work_type ?? "");
+        setExpHighlight(exp.highlight ?? "");
+        setSelectedExpSkillIds(
+            experienceSkills
+                .filter((es) => es.experience_id === exp.id)
+                .map((es) => es.skill_id)
+        );
     }
 
     function handleCancelEditExperience() {
@@ -447,6 +488,8 @@ export default function Dashboard() {
         setEndDate("");
         setExpDescription("");
         setWorkType("");
+        setExpHighlight("");
+        setSelectedExpSkillIds([]);
     }
 
     async function handleDeleteExperience(id: string) {
@@ -465,6 +508,19 @@ export default function Dashboard() {
             .select("*")
             .order("created_at", { ascending: true });
         setExperiencePhotos(data ?? []);
+    }
+
+    async function loadExperienceSkills() {
+        const { data } = await supabase.from("experience_skills").select("*");
+        setExperienceSkills(data ?? []);
+    }
+
+    function toggleExpSkill(skillId: string) {
+        setSelectedExpSkillIds((prev) =>
+            prev.includes(skillId)
+                ? prev.filter((id) => id !== skillId)
+                : [...prev, skillId]
+        );
     }
 
     async function loadProjectPhotos() {
@@ -1327,6 +1383,49 @@ export default function Dashboard() {
                                     className={inputCls}
                                 />
                             </Field>
+                            <Field label="Kullanılan teknolojiler">
+                                <div className="flex flex-wrap gap-2">
+                                    {skills.map((skill) => {
+                                        const selected = selectedExpSkillIds.includes(skill.id);
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={skill.id}
+                                                onClick={() => toggleExpSkill(skill.id)}
+                                                className={`flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border text-sm transition-colors ${selected
+                                                    ? "bg-purple-600/20 border-purple-500/50 text-purple-200"
+                                                    : "bg-zinc-800/60 border-white/10 text-zinc-400 hover:border-white/25"
+                                                    }`}
+                                            >
+                                                {skill.logo_url && (
+                                                    <img
+                                                        src={skill.logo_url}
+                                                        alt={skill.name}
+                                                        className="w-5 h-5 object-contain rounded bg-white/90 p-0.5"
+                                                    />
+                                                )}
+                                                {skill.name}
+                                            </button>
+                                        );
+                                    })}
+                                    {skills.length === 0 && (
+                                        <p className="text-xs text-zinc-500">
+                                            Önce "Yetenekler" sekmesinden en az bir teknoloji eklemelisin.
+                                        </p>
+                                    )}
+                                </div>
+                            </Field>
+
+                            <Field label="Öne çıkan istatistik/başarı (opsiyonel, her satır ayrı madde olur)">
+                                <textarea
+                                    placeholder={"Örn:\n1 Flutter mobil uygulamasında aktif rol aldım\n1 React Native mobil uygulamasında aktif rol aldım"}
+                                    value={expHighlight}
+                                    onChange={(e) => setExpHighlight(e.target.value)}
+                                    rows={3}
+                                    className={inputCls}
+                                />
+                            </Field>
+
                             <div className="flex gap-3 pt-2">
                                 <button type="submit" className={primaryBtnCls}>
                                     {editingExperienceId ? "Güncelle" : "Ekle"}
@@ -1371,6 +1470,37 @@ export default function Dashboard() {
                                                 <p className="text-sm text-zinc-400 mt-3 whitespace-pre-line">
                                                     {exp.description}
                                                 </p>
+                                            )}
+                                            {(() => {
+                                                const attached = experienceSkills
+                                                    .filter((es) => es.experience_id === exp.id)
+                                                    .map((es) => skills.find((s) => s.id === es.skill_id))
+                                                    .filter((s): s is Skill => Boolean(s));
+                                                if (attached.length === 0) return null;
+                                                return (
+                                                    <div className="flex flex-wrap gap-2 mt-3">
+                                                        {attached.map((skill) => (
+                                                            <span
+                                                                key={skill.id}
+                                                                className="flex items-center gap-1.5 text-xs text-zinc-400 bg-white/5 border border-white/10 rounded-full px-2.5 py-1"
+                                                            >
+                                                                {skill.logo_url && (
+                                                                    <img
+                                                                        src={skill.logo_url}
+                                                                        alt={skill.name}
+                                                                        className="w-4 h-4 object-contain"
+                                                                    />
+                                                                )}
+                                                                {skill.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })()}
+                                            {exp.highlight && (
+                                                <div className="flex items-center gap-2 mt-3 text-xs text-purple-300 bg-purple-600/10 border border-purple-500/25 rounded-lg px-3 py-2">
+                                                    🚀 {exp.highlight}
+                                                </div>
                                             )}
                                         </div>
                                         <div className="flex gap-4 shrink-0">

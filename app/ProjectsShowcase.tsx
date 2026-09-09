@@ -305,6 +305,7 @@ export default function ProjectsShowcase({
     projectPhotos: ProjectPhoto[];
 }) {
     const [selectedId, setSelectedId] = useState(projects[0]?.id);
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
     if (!projects || projects.length === 0) return null;
 
@@ -340,7 +341,7 @@ export default function ProjectsShowcase({
                                 <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-600/30 shrink-0" />
                             )}
                             <div>
-                                <div className="text-white font-semibold text-base mb-1">
+                                <div className="text-white font-semibold text-lg mb-1.5">
                                     {project.title}
                                 </div>
                                 {project.tech_stack && (
@@ -353,7 +354,7 @@ export default function ProjectsShowcase({
                                             .map((tag) => (
                                                 <span
                                                     key={tag}
-                                                    className="text-[10px] text-indigo-300 border border-indigo-400/25 bg-indigo-400/10 rounded-full px-2 py-0.5"
+                                                    className="text-xs text-indigo-300 border border-indigo-400/25 bg-indigo-400/10 rounded-full px-2.5 py-1"
                                                 >
                                                     {tag}
                                                 </span>
@@ -361,7 +362,7 @@ export default function ProjectsShowcase({
                                     </div>
                                 )}
                                 {project.description && (
-                                    <p className="text-xs text-white/45 mt-1.5 line-clamp-2 max-w-[260px]">
+                                    <p className="text-sm text-white/55 mt-2 line-clamp-2 max-w-[280px]">
                                         {project.description
                                             .split(/[•\n]/)
                                             .map((d) => d.trim())
@@ -395,13 +396,19 @@ export default function ProjectsShowcase({
                     <Terminal project={selected} title={selected.title} />
 
                     {photos.length > 0 && (
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            {photos.map((photo) => (
+                        <div
+                            className="grid gap-3 mb-6"
+                            style={{
+                                gridTemplateColumns: `repeat(${photos.length}, 1fr)`,
+                            }}
+                        >
+                            {photos.map((photo, i) => (
                                 <img
                                     key={photo.id}
                                     src={photo.image_url}
                                     alt={selected.title}
-                                    className="w-full aspect-[4/3] object-cover rounded-xl border border-white/10 transition-transform hover:-translate-y-1"
+                                    onClick={() => setLightboxIndex(i)}
+                                    className="w-full aspect-[4/3] object-cover rounded-xl border border-white/10 transition-transform hover:-translate-y-1 cursor-zoom-in"
                                 />
                             ))}
                         </div>
@@ -448,6 +455,53 @@ export default function ProjectsShowcase({
                     </div>
                 </div>
             </div>
+
+            {lightboxIndex !== null && photos[lightboxIndex] && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-6"
+                    onClick={() => setLightboxIndex(null)}
+                >
+                    <button
+                        onClick={() => setLightboxIndex(null)}
+                        className="absolute top-5 right-5 text-white/70 hover:text-white text-3xl leading-none"
+                    >
+                        ✕
+                    </button>
+
+                    {photos.length > 1 && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setLightboxIndex(
+                                    (lightboxIndex - 1 + photos.length) % photos.length
+                                );
+                            }}
+                            className="absolute left-4 md:left-8 text-white/70 hover:text-white text-4xl px-3 select-none"
+                        >
+                            ‹
+                        </button>
+                    )}
+
+                    <img
+                        src={photos[lightboxIndex].image_url}
+                        alt={selected.title}
+                        onClick={(e) => e.stopPropagation()}
+                        className="max-w-[90vw] max-h-[85vh] object-contain rounded-xl border border-white/10"
+                    />
+
+                    {photos.length > 1 && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setLightboxIndex((lightboxIndex + 1) % photos.length);
+                            }}
+                            className="absolute right-4 md:right-8 text-white/70 hover:text-white text-4xl px-3 select-none"
+                        >
+                            ›
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

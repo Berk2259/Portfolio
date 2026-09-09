@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import PhotoStack from "./PhotoStack";
-import ExperiencePhoto from "./ExperiencePhoto";
 import TechFloat from "./TechFloat";
 import ProjectsShowcase from "./ProjectsShowcase";
+import ExperienceTimeline from "./ExperienceTimeline";
 
 export default async function Home() {
   const { data: projects } = await supabase.from("projects").select("*");
@@ -26,6 +26,9 @@ export default async function Home() {
     .from("experience_photos")
     .select("*")
     .order("created_at", { ascending: true });
+  const { data: experienceSkills } = await supabase
+    .from("experience_skills")
+    .select("*");
   const { data: skills } = await supabase
     .from("skills")
     .select("*")
@@ -151,7 +154,7 @@ export default async function Home() {
       </section>
 
       {/* DİĞER BÖLÜMLER */}
-      <div className="w-full px-6 md:pl-32 py-16 space-y-16">
+      <div className="w-full px-6 md:px-32 py-16 space-y-16">
         <section id="egitim">
           <h2 className="text-3xl font-semibold mb-8">Eğitim</h2>
           <div className="flex flex-col md:flex-row items-start justify-between gap-8">
@@ -200,116 +203,20 @@ export default async function Home() {
         </section>
 
         <section id="deneyim">
-          <h2 className="text-3xl font-semibold mb-12 text-center">
-            Deneyim
-          </h2>
-          <div className="relative w-full">
-            {/* ORTA ÇİZGİ */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-400 to-purple-500" />
-
-            <div className="space-y-12">
-              {experiences?.map((exp, i) => {
-                const photos =
-                  experiencePhotos?.filter(
-                    (p) => p.experience_id === exp.id
-                  ) ?? [];
-                const isEven = i % 2 === 0;
-                return (
-                  <div
-                    key={exp.id}
-                    className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-4 animate-fade-in-up"
-                    style={{ animationDelay: `${i * 150}ms` }}
-                  >
-                    {/* SOL SÜTUN */}
-                    <div className={isEven ? "text-left" : "flex justify-center"}>
-                      {isEven ? (
-                        <div className="rounded-xl p-4 transition-colors hover:bg-white/5">
-                          <div className="flex flex-wrap items-center justify-start gap-3">
-                            <h3 className="font-semibold text-lg">
-                              {exp.company}
-                            </h3>
-                            {exp.start_date && (
-                              <span className="text-sm text-indigo-300 border border-indigo-400/30 bg-indigo-400/10 rounded-full px-3 py-1">
-                                {exp.start_date} - {exp.end_date}
-                              </span>
-                            )}
-                          </div>
-                          {(exp.position || exp.work_type) && (
-                            <p className="text-gray-400 text-base mt-1">
-                              {exp.position}
-                              {exp.work_type && ` • ${exp.work_type}`}
-                            </p>
-                          )}
-                          {exp.description && (
-                            <ul className="text-gray-500 text-base mt-2 space-y-1 list-disc list-inside">
-                              {exp.description
-                                .split("•")
-                                .map((item: string) => item.trim())
-                                .filter((item: string) => item.length > 0)
-                                .map((item: string, idx: number) => (
-                                  <li key={idx}>{item}</li>
-                                ))}
-                            </ul>
-                          )}
-                        </div>
-                      ) : (
-                        photos.length > 0 && (
-                          <ExperiencePhoto photos={photos} alt={exp.company} />
-                        )
-                      )}
-                    </div>
-
-                    {/* ORTA: NOKTA */}
-                    <div className="relative w-4 flex justify-center">
-                      <span className="absolute top-2">
-                        <span className="absolute inset-0 w-4 h-4 rounded-full bg-purple-500 blur-md opacity-60" />
-                        <span className="relative block w-4 h-4 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 ring-4 ring-black" />
-                      </span>
-                    </div>
-
-                    {/* SAĞ SÜTUN */}
-                    <div className={isEven ? "flex justify-center" : "text-left"}>
-                      {isEven ? (
-                        photos.length > 0 && (
-                          <ExperiencePhoto photos={photos} alt={exp.company} />
-                        )
-                      ) : (
-                        <div className="rounded-xl p-4 transition-colors hover:bg-white/5">
-                          <div className="flex flex-wrap items-center justify-start gap-3">
-                            <h3 className="font-semibold text-lg">
-                              {exp.company}
-                            </h3>
-                            {exp.start_date && (
-                              <span className="text-sm text-indigo-300 border border-indigo-400/30 bg-indigo-400/10 rounded-full px-3 py-1">
-                                {exp.start_date} - {exp.end_date}
-                              </span>
-                            )}
-                          </div>
-                          {(exp.position || exp.work_type) && (
-                            <p className="text-gray-400 text-base mt-1">
-                              {exp.position}
-                              {exp.work_type && ` • ${exp.work_type}`}
-                            </p>
-                          )}
-                          {exp.description && (
-                            <ul className="text-gray-500 text-base mt-2 space-y-1 list-disc list-inside">
-                              {exp.description
-                                .split("•")
-                                .map((item: string) => item.trim())
-                                .filter((item: string) => item.length > 0)
-                                .map((item: string, idx: number) => (
-                                  <li key={idx}>{item}</li>
-                                ))}
-                            </ul>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="text-center mb-16 animate-fade-in-up">
+            <p className="text-xs tracking-[0.18em] uppercase text-purple-400 font-semibold mb-2">
+              Kariyer Yolculuğu
+            </p>
+            <h2 className="text-3xl font-extrabold bg-gradient-to-br from-white via-purple-300 to-fuchsia-300 bg-clip-text text-transparent">
+              Deneyim
+            </h2>
           </div>
+          <ExperienceTimeline
+            experiences={experiences ?? []}
+            experiencePhotos={experiencePhotos ?? []}
+            experienceSkills={experienceSkills ?? []}
+            skills={skills ?? []}
+          />
         </section>
 
         <section id="projeler">
@@ -328,3 +235,4 @@ export default async function Home() {
     </div>
   );
 }
+
