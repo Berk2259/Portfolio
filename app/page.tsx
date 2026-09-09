@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+export const dynamic = "force-dynamic";
 import PhotoStack from "./PhotoStack";
 import TechFloat from "./TechFloat";
 import ProjectsShowcase from "./ProjectsShowcase";
