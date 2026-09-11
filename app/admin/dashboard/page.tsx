@@ -39,9 +39,6 @@ type Profile = {
     title: string | null;
     bio: string | null;
     badge_text: string | null;
-    github_url: string | null;
-    linkedin_url: string | null;
-    email: string | null;
     avatar_url: string | null;
 };
 
@@ -68,6 +65,36 @@ type Skill = {
     logo_url: string | null;
 };
 
+type ContactInfo = {
+    id: number;
+    email: string | null;
+    github_url: string | null;
+    linkedin_url: string | null;
+    cv_url: string | null;
+    heading: string | null;
+    description: string | null;
+};
+
+type QuizQuestion = {
+    id: string;
+    question: string;
+    option_a: string;
+    option_b: string;
+    option_c: string;
+    option_d: string;
+    correct_option: "a" | "b" | "c" | "d";
+};
+
+type QuizQuestion = {
+    id: string;
+    question: string;
+    option_a: string;
+    option_b: string;
+    option_c: string;
+    option_d: string;
+    correct_option: "a" | "b" | "c" | "d";
+};
+
 type ProjectPhoto = {
     id: string;
     project_id: string;
@@ -81,6 +108,7 @@ const TABS = [
     { key: "gallery", label: "Galeri", icon: "🖼️" },
     { key: "experience", label: "Deneyim", icon: "🏢" },
     { key: "skills", label: "Yetenekler", icon: "⚙️" },
+    { key: "contact", label: "İletişim", icon: "✉️" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -152,6 +180,18 @@ export default function Dashboard() {
     const [selectedExpSkillIds, setSelectedExpSkillIds] = useState<string[]>([]);
     const [skills, setSkills] = useState<Skill[]>([]);
     const [skillName, setSkillName] = useState("");
+    const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+    const [contactSaved, setContactSaved] = useState(false);
+    const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+    const [quizQuestion, setQuizQuestion] = useState("");
+    const [quizOptionA, setQuizOptionA] = useState("");
+    const [quizOptionB, setQuizOptionB] = useState("");
+    const [quizOptionC, setQuizOptionC] = useState("");
+    const [quizOptionD, setQuizOptionD] = useState("");
+    const [quizCorrectOption, setQuizCorrectOption] = useState<
+        "a" | "b" | "c" | "d"
+    >("a");
+    const [editingQuizId, setEditingQuizId] = useState<string | null>(null);
     const [projectImageUrl, setProjectImageUrl] = useState("");
     const [editingProjectId, setEditingProjectId] = useState<string | null>(
         null
@@ -180,6 +220,8 @@ export default function Dashboard() {
                 loadProfile();
                 loadSkills();
                 loadProjectPhotos();
+                loadContactInfo();
+                loadQuizQuestions();
             }
             setLoading(false);
         });
@@ -233,10 +275,120 @@ export default function Dashboard() {
         await supabase.from("gallery").delete().eq("id", id);
         loadGallery();
     }
-
     async function loadProfile() {
         const { data } = await supabase.from("profile").select("*").single();
         setProfile(data);
+    }
+
+    async function loadContactInfo() {
+        const { data } = await supabase.from("contact_info").select("*").single();
+        setContactInfo(data);
+    }
+
+    async function handleSaveContactInfo(e: React.FormEvent) {
+        e.preventDefault();
+        if (!contactInfo) return;
+        await supabase
+            .from("contact_info")
+            .update({
+                email: contactInfo.email,
+                github_url: contactInfo.github_url,
+                linkedin_url: contactInfo.linkedin_url,
+                cv_url: contactInfo.cv_url,
+                heading: contactInfo.heading,
+                description: contactInfo.description,
+            })
+            .eq("id", 1);
+        setContactSaved(true);
+        setTimeout(() => setContactSaved(false), 2000);
+    }
+
+    async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file || !contactInfo) return;
+
+        const filePath = `cv-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        setContactInfo({ ...contactInfo, cv_url: data.publicUrl });
+    }
+
+    async function loadQuizQuestions() {
+        const { data } = await supabase
+            .from("contact_quiz_questions")
+            .select("*")
+            .order("created_at", { ascending: false });
+        setQuizQuestions(data ?? []);
+    }
+
+    async function handleAddQuizQuestion(e: React.FormEvent) {
+        e.preventDefault();
+
+        if (editingQuizId) {
+            await supabase
+                .from("contact_quiz_questions")
+                .update({
+                    question: quizQuestion,
+                    option_a: quizOptionA,
+                    option_b: quizOptionB,
+                    option_c: quizOptionC,
+                    option_d: quizOptionD,
+                    correct_option: quizCorrectOption,
+                })
+                .eq("id", editingQuizId);
+            setEditingQuizId(null);
+        } else {
+            await supabase.from("contact_quiz_questions").insert({
+                question: quizQuestion,
+                option_a: quizOptionA,
+                option_b: quizOptionB,
+                option_c: quizOptionC,
+                option_d: quizOptionD,
+                correct_option: quizCorrectOption,
+            });
+        }
+
+        setQuizQuestion("");
+        setQuizOptionA("");
+        setQuizOptionB("");
+        setQuizOptionC("");
+        setQuizOptionD("");
+        setQuizCorrectOption("a");
+        loadQuizQuestions();
+    }
+
+    function handleEditQuizQuestion(q: QuizQuestion) {
+        setEditingQuizId(q.id);
+        setQuizQuestion(q.question);
+        setQuizOptionA(q.option_a);
+        setQuizOptionB(q.option_b);
+        setQuizOptionC(q.option_c);
+        setQuizOptionD(q.option_d);
+        setQuizCorrectOption(q.correct_option);
+    }
+
+    function handleCancelEditQuiz() {
+        setEditingQuizId(null);
+        setQuizQuestion("");
+        setQuizOptionA("");
+        setQuizOptionB("");
+        setQuizOptionC("");
+        setQuizOptionD("");
+        setQuizCorrectOption("a");
+    }
+
+    async function handleDeleteQuizQuestion(id: string) {
+        await supabase.from("contact_quiz_questions").delete().eq("id", id);
+        loadQuizQuestions();
     }
 
     async function handleAddProject(e: React.FormEvent) {
@@ -646,9 +798,6 @@ export default function Dashboard() {
                 title: profile.title,
                 bio: profile.bio,
                 badge_text: profile.badge_text,
-                github_url: profile.github_url,
-                linkedin_url: profile.linkedin_url,
-                email: profile.email,
                 avatar_url: profile.avatar_url,
             })
             .eq("id", 1);
@@ -799,38 +948,6 @@ export default function Dashboard() {
                                             className={inputCls}
                                         />
                                     </Field>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <Field label="GitHub linki">
-                                            <input
-                                                type="text"
-                                                value={profile.github_url ?? ""}
-                                                onChange={(e) =>
-                                                    setProfile({ ...profile, github_url: e.target.value })
-                                                }
-                                                className={inputCls}
-                                            />
-                                        </Field>
-                                        <Field label="LinkedIn linki">
-                                            <input
-                                                type="text"
-                                                value={profile.linkedin_url ?? ""}
-                                                onChange={(e) =>
-                                                    setProfile({ ...profile, linkedin_url: e.target.value })
-                                                }
-                                                className={inputCls}
-                                            />
-                                        </Field>
-                                    </div>
-                                    <Field label="E-posta">
-                                        <input
-                                            type="email"
-                                            value={profile.email ?? ""}
-                                            onChange={(e) =>
-                                                setProfile({ ...profile, email: e.target.value })
-                                            }
-                                            className={inputCls}
-                                        />
-                                    </Field>
                                     <div className="flex items-center gap-3 pt-2">
                                         <button type="submit" className={primaryBtnCls}>
                                             Kaydet
@@ -872,10 +989,6 @@ export default function Dashboard() {
                                                 {profile.bio}
                                             </p>
                                         )}
-                                        <div className="flex justify-center gap-3 mt-5 text-xs text-zinc-500">
-                                            {profile.github_url && <span>GitHub ↗</span>}
-                                            {profile.linkedin_url && <span>LinkedIn ↗</span>}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1605,6 +1718,222 @@ export default function Dashboard() {
                                     >
                                         ✕
                                     </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {activeTab === "contact" && (
+                    <div className="space-y-6">
+                        <h2 className="text-xl font-semibold">İletişim Bilgileri</h2>
+                        {contactInfo && (
+                            <form onSubmit={handleSaveContactInfo} className={`${cardCls} space-y-6`}>
+                                <Field label="Başlık">
+                                    <input
+                                        type="text"
+                                        value={contactInfo.heading ?? ""}
+                                        onChange={(e) =>
+                                            setContactInfo({ ...contactInfo, heading: e.target.value })
+                                        }
+                                        className={inputCls}
+                                    />
+                                </Field>
+                                <Field label="Açıklama">
+                                    <textarea
+                                        value={contactInfo.description ?? ""}
+                                        onChange={(e) =>
+                                            setContactInfo({ ...contactInfo, description: e.target.value })
+                                        }
+                                        rows={3}
+                                        className={inputCls}
+                                    />
+                                </Field>
+                                <Field label="E-posta">
+                                    <input
+                                        type="email"
+                                        value={contactInfo.email ?? ""}
+                                        onChange={(e) =>
+                                            setContactInfo({ ...contactInfo, email: e.target.value })
+                                        }
+                                        className={inputCls}
+                                    />
+                                </Field>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <Field label="GitHub linki">
+                                        <input
+                                            type="text"
+                                            value={contactInfo.github_url ?? ""}
+                                            onChange={(e) =>
+                                                setContactInfo({ ...contactInfo, github_url: e.target.value })
+                                            }
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                    <Field label="LinkedIn linki">
+                                        <input
+                                            type="text"
+                                            value={contactInfo.linkedin_url ?? ""}
+                                            onChange={(e) =>
+                                                setContactInfo({ ...contactInfo, linkedin_url: e.target.value })
+                                            }
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                </div>
+                                <Field label="CV (PDF)">
+                                    <div className="flex items-center gap-4">
+                                        {contactInfo.cv_url && (
+                                            <a
+                                                href={contactInfo.cv_url}
+                                                target="_blank"
+                                                className="text-xs text-purple-400 underline"
+                                            >
+                                                Mevcut CV'yi görüntüle
+                                            </a>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="application/pdf"
+                                            onChange={handleCvUpload}
+                                            className="text-sm text-zinc-400"
+                                        />
+                                    </div>
+                                </Field>
+                                <div className="flex items-center gap-3 pt-2">
+                                    <button type="submit" className={primaryBtnCls}>
+                                        Kaydet
+                                    </button>
+                                    {contactSaved && (
+                                        <span className="text-green-400 text-sm">Kaydedildi ✓</span>
+                                    )}
+                                </div>
+                            </form>
+                        )}
+
+                        <h2 className="text-xl font-semibold pt-4">
+                            {editingQuizId ? "Quiz Sorusunu Düzenle" : "Yeni Quiz Sorusu Ekle"}
+                        </h2>
+                        <form
+                            onSubmit={handleAddQuizQuestion}
+                            className={`${cardCls} space-y-6`}
+                        >
+                            <Field label="Soru">
+                                <input
+                                    type="text"
+                                    value={quizQuestion}
+                                    onChange={(e) => setQuizQuestion(e.target.value)}
+                                    className={inputCls}
+                                    required
+                                />
+                            </Field>
+                            <div className="grid grid-cols-2 gap-6">
+                                <Field label="A şıkkı">
+                                    <input
+                                        type="text"
+                                        value={quizOptionA}
+                                        onChange={(e) => setQuizOptionA(e.target.value)}
+                                        className={inputCls}
+                                        required
+                                    />
+                                </Field>
+                                <Field label="B şıkkı">
+                                    <input
+                                        type="text"
+                                        value={quizOptionB}
+                                        onChange={(e) => setQuizOptionB(e.target.value)}
+                                        className={inputCls}
+                                        required
+                                    />
+                                </Field>
+                                <Field label="C şıkkı">
+                                    <input
+                                        type="text"
+                                        value={quizOptionC}
+                                        onChange={(e) => setQuizOptionC(e.target.value)}
+                                        className={inputCls}
+                                        required
+                                    />
+                                </Field>
+                                <Field label="D şıkkı">
+                                    <input
+                                        type="text"
+                                        value={quizOptionD}
+                                        onChange={(e) => setQuizOptionD(e.target.value)}
+                                        className={inputCls}
+                                        required
+                                    />
+                                </Field>
+                            </div>
+                            <Field label="Doğru şık">
+                                <select
+                                    value={quizCorrectOption}
+                                    onChange={(e) =>
+                                        setQuizCorrectOption(
+                                            e.target.value as "a" | "b" | "c" | "d"
+                                        )
+                                    }
+                                    className={inputCls}
+                                >
+                                    <option value="a">A</option>
+                                    <option value="b">B</option>
+                                    <option value="c">C</option>
+                                    <option value="d">D</option>
+                                </select>
+                            </Field>
+                            <div className="flex gap-3 pt-2">
+                                <button type="submit" className={primaryBtnCls}>
+                                    {editingQuizId ? "Güncelle" : "Ekle"}
+                                </button>
+                                {editingQuizId && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCancelEditQuiz}
+                                        className={secondaryBtnCls}
+                                    >
+                                        İptal
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+
+                        <h2 className="text-xl font-semibold pt-4">Mevcut Sorular</h2>
+                        <ul className="space-y-3">
+                            {quizQuestions.map((q) => (
+                                <li key={q.id} className={cardCls}>
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div>
+                                            <p className="font-semibold text-base">{q.question}</p>
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {(["a", "b", "c", "d"] as const).map((opt) => (
+                                                    <span
+                                                        key={opt}
+                                                        className={`text-xs px-2 py-1 rounded-full border ${
+                                                            q.correct_option === opt
+                                                                ? "bg-green-600/15 text-green-300 border-green-500/30"
+                                                                : "bg-white/5 text-zinc-400 border-white/10"
+                                                        }`}
+                                                    >
+                                                        {opt.toUpperCase()}: {q[`option_${opt}`]}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-4 shrink-0">
+                                            <button
+                                                onClick={() => handleEditQuizQuestion(q)}
+                                                className="text-purple-400 hover:text-purple-300 text-sm font-medium"
+                                            >
+                                                Düzenle
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteQuizQuestion(q.id)}
+                                                className="text-red-400 hover:text-red-300 text-sm font-medium"
+                                            >
+                                                Sil
+                                            </button>
+                                        </div>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
