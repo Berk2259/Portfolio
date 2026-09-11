@@ -4,6 +4,7 @@ import PhotoStack from "./PhotoStack";
 import TechFloat from "./TechFloat";
 import ProjectsShowcase from "./ProjectsShowcase";
 import ExperienceTimeline from "./ExperienceTimeline";
+import ContactSection from "./ContactSection";
 
 export default async function Home() {
   const { data: projects } = await supabase.from("projects").select("*");
@@ -229,8 +230,12 @@ export default async function Home() {
         </section>
 
         <section id="iletisim">
-          <h2 className="text-2xl font-semibold mb-4">İletişim</h2>
-          <p>E-posta: {profile?.email}</p>
+          <ContactSection
+            profile={profile}
+            projectCount={projects?.length ?? 0}
+            experienceCount={experiences?.length ?? 0}
+            skillCount={skills?.length ?? 0}
+          />
         </section>
       </div>
     </div>

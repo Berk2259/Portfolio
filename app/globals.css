@@ -241,6 +241,24 @@ body {
 }
 
 @keyframes expPulseRing {
-  0% { transform: scale(.85); opacity: .7; }
-  100% { transform: scale(1.7); opacity: 0; }
+  0% {
+    transform: scale(.85);
+    opacity: .7;
+  }
+
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+@keyframes contactShine {
+  0% {
+    transform: translateX(-150%);
+  }
+
+  50%,
+  100% {
+    transform: translateX(250%);
+  }
 }
