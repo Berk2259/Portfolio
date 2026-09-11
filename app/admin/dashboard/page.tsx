@@ -85,16 +85,6 @@ type QuizQuestion = {
     correct_option: "a" | "b" | "c" | "d";
 };
 
-type QuizQuestion = {
-    id: string;
-    question: string;
-    option_a: string;
-    option_b: string;
-    option_c: string;
-    option_d: string;
-    correct_option: "a" | "b" | "c" | "d";
-};
-
 type ProjectPhoto = {
     id: string;
     project_id: string;
