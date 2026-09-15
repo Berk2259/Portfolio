@@ -204,7 +204,7 @@ function TimelineItem({
             .filter((s) => s.length > 0) ?? [];
 
     const card = (
-               <div
+        <div
             className="relative w-full max-w-[900px] rounded-[20px] border border-white/8 p-[2px] transition-all duration-700 ease-out"
             style={{
                 background:
@@ -278,148 +278,161 @@ function TimelineItem({
         </div>
     );
 
-    const hasSidePanel = skills.length > 0 || Boolean(exp.highlight);
-
-    const sidePanel = hasSidePanel && (
-        <div className="flex flex-col gap-5 w-[400px] pt-1">
-            {skills.length > 0 && (
-                <div className="flex flex-wrap gap-4">
-                    {skills.map((skill) => (
-                        <div key={skill.id} className="flex flex-col items-center gap-2">
-                            <span
-                                className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
-                                style={{
-                                    backgroundColor: `${c1}1a`,
-                                    border: `1px solid ${c1}4d`,
-                                }}
-                            >
-                                {skill.logo_url ? (
-                                    <img
-                                        src={skill.logo_url}
-                                        alt={skill.name}
-                                        className="w-9 h-9 object-contain"
-                                    />
-                                ) : (
-                                    <span className="text-2xl">💠</span>
-                                )}
-                            </span>
-                            <span className="text-[11.5px] text-zinc-400">{skill.name}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {exp.highlight && (
-                <div
-                    className="rounded-2xl px-5 py-4"
-                    style={{
-                        backgroundColor: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        borderLeft: `3px solid ${c1}`,
-                    }}
-                >
-                    <p
-                        className="text-[9.5px] tracking-[0.12em] uppercase font-bold mb-3.5"
-                        style={{ color: c1 }}
+    const skillsRow = skills.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+            {skills.map((skill) => (
+                <div key={skill.id} className="flex flex-col items-center gap-2">
+                    <span
+                        className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                        style={{
+                            backgroundColor: `${c1}1a`,
+                            border: `1px solid ${c1}4d`,
+                        }}
                     >
-                        Öne Çıkan Başarı
-                    </p>
-                    <ul className="flex flex-col gap-3">
-                        {exp.highlight
-                            ?.split("\n")
-                            .map((line) => line.trim())
-                            .filter((line) => line.length > 0)
-                            .map((line, i) => (
-                                <li key={i} className="flex items-start gap-2.5">
-                                    <span
-                                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-                                        style={{
-                                            background: `linear-gradient(135deg, ${c1}, ${c2})`,
-                                        }}
-                                    >
-                                        {i + 1}
-                                    </span>
-                                    <span className="text-[13.5px] text-zinc-300 leading-relaxed">
-                                        {line}
-                                    </span>
-                                </li>
-                            ))}
-                    </ul>
+                        {skill.logo_url ? (
+                            <img
+                                src={skill.logo_url}
+                                alt={skill.name}
+                                className="w-9 h-9 object-contain"
+                            />
+                        ) : (
+                            <span className="text-2xl">💠</span>
+                        )}
+                    </span>
+                    <span className="text-[11.5px] text-zinc-400">{skill.name}</span>
                 </div>
-            )}
+            ))}
         </div>
     );
 
-    const photo = photos.length > 0 && (
+    const highlightBox = exp.highlight && (
         <div
-            className={`transition-all duration-700 ease-out delay-100 flex items-center gap-10 ${cardOnLeft ? "flex-row" : "flex-row-reverse"
+            className="rounded-2xl px-5 py-4 w-full"
+            style={{
+                backgroundColor: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderLeft: `3px solid ${c1}`,
+            }}
+        >
+            <p
+                className="text-[9.5px] tracking-[0.12em] uppercase font-bold mb-3.5"
+                style={{ color: c1 }}
+            >
+                Öne Çıkan Başarı
+            </p>
+            <ul className="flex flex-col gap-3">
+                {exp.highlight
+                    ?.split("\n")
+                    .map((line) => line.trim())
+                    .filter((line) => line.length > 0)
+                    .map((line, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                            <span
+                                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                                style={{
+                                    background: `linear-gradient(135deg, ${c1}, ${c2})`,
+                                }}
+                            >
+                                {i + 1}
+                            </span>
+                            <span className="text-[13.5px] text-zinc-300 leading-relaxed">
+                                {line}
+                            </span>
+                        </li>
+                    ))}
+            </ul>
+        </div>
+    );
+
+    const sidePanel = (skillsRow || highlightBox) && (
+        <div className="flex flex-col gap-5 w-full lg:w-[400px] pt-1">
+            {skillsRow}
+            {highlightBox}
+        </div>
+    );
+
+    const polaroid = photos.length > 0 && (
+        <PolaroidPhoto
+            photos={photos}
+            alt={exp.company}
+            tilt={tilt}
+            c1={c1}
+            c2={c2}
+            workType={exp.work_type}
+        />
+    );
+
+    const photo = polaroid && (
+        <div
+            className={`transition-all duration-700 ease-out delay-100 flex flex-col items-center gap-6 lg:gap-10 ${cardOnLeft ? "lg:flex-row" : "lg:flex-row-reverse"
                 }`}
             style={{
                 opacity: active ? 1 : 0,
                 transform: active ? "translateY(0)" : "translateY(28px)",
             }}
         >
-            <PolaroidPhoto
-                photos={photos}
-                alt={exp.company}
-                tilt={tilt}
-                c1={c1}
-                c2={c2}
-                workType={exp.work_type}
-            />
+            {polaroid}
             {sidePanel}
         </div>
     );
 
     return (
-        <div
-            ref={ref}
-            className="relative grid grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)] gap-10 mb-24 last:mb-0"
-        >
-            {/* connector */}
-            <div
-                className="absolute top-1/2 -translate-y-1/2 h-[2px] w-10 transition-opacity duration-500 delay-300 hidden md:block"
-                style={{
-                    opacity: active ? 0.55 : 0,
-                    ...(cardOnLeft
-                        ? {
-                            right: "calc(50% + 32px)",
-                            background: `linear-gradient(270deg, ${c1}, transparent)`,
-                        }
-                        : {
-                            left: "calc(50% + 32px)",
-                            background: `linear-gradient(90deg, ${c1}, transparent)`,
-                        }),
-                }}
-            />
-
-            <div className="h-full flex items-center justify-center">
-                {cardOnLeft ? card : photo}
+        <div ref={ref} className="mb-24 last:mb-0">
+            {/* Mobil/Tablet: sabit sıra - fotoğraf, teknolojiler, genel bilgi, öne çıkan başarı */}
+            <div className="flex flex-col items-center gap-6 lg:hidden">
+                {polaroid}
+                {skillsRow}
+                {card}
+                {highlightBox}
             </div>
 
-            <div className="h-full flex items-center justify-center relative">
+            {/* Masaüstü: orijinal 2 sütunlu zigzag tasarım */}
+            <div className="relative hidden lg:grid lg:grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)] lg:gap-10">
+                {/* connector */}
                 <div
-                    className="relative w-4 h-4 rounded-full border transition-all duration-500 z-10"
+                    className="absolute top-1/2 -translate-y-1/2 h-[2px] w-10 transition-opacity duration-500 delay-300"
                     style={{
-                        background: active
-                            ? `linear-gradient(135deg, ${c1}, ${c2})`
-                            : "#111015",
-                        borderColor: active ? "transparent" : "rgba(255,255,255,0.1)",
-                        boxShadow: active ? "0 0 0 5px rgba(255,255,255,0.04)" : "none",
-                        transform: active ? "scale(1.06)" : "scale(1)",
+                        opacity: active ? 0.55 : 0,
+                        ...(cardOnLeft
+                            ? {
+                                right: "calc(50% + 32px)",
+                                background: `linear-gradient(270deg, ${c1}, transparent)`,
+                            }
+                            : {
+                                left: "calc(50% + 32px)",
+                                background: `linear-gradient(90deg, ${c1}, transparent)`,
+                            }),
                     }}
-                >
-                    {ongoing && active && (
-                        <span
-                            className="absolute -inset-1.5 rounded-full animate-[expPulseRing_2.2s_ease-out_infinite]"
-                            style={{ border: `1.5px solid ${c1}` }}
-                        />
-                    )}
-                </div>
-            </div>
+                />
 
-            <div className="h-full flex items-center justify-start">
-                {cardOnLeft ? photo : card}
+                <div className="h-full flex items-center justify-center">
+                    {cardOnLeft ? card : photo}
+                </div>
+
+                <div className="h-full flex items-center justify-center relative">
+                    <div
+                        className="relative w-4 h-4 rounded-full border transition-all duration-500 z-10"
+                        style={{
+                            background: active
+                                ? `linear-gradient(135deg, ${c1}, ${c2})`
+                                : "#111015",
+                            borderColor: active ? "transparent" : "rgba(255,255,255,0.1)",
+                            boxShadow: active ? "0 0 0 5px rgba(255,255,255,0.04)" : "none",
+                            transform: active ? "scale(1.06)" : "scale(1)",
+                        }}
+                    >
+                        {ongoing && active && (
+                            <span
+                                className="absolute -inset-1.5 rounded-full animate-[expPulseRing_2.2s_ease-out_infinite]"
+                                style={{ border: `1.5px solid ${c1}` }}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <div className="h-full flex items-center justify-start">
+                    {cardOnLeft ? photo : card}
+                </div>
             </div>
         </div>
     );
@@ -459,7 +472,7 @@ export default function ExperienceTimeline({
 
     return (
         <div className="relative" ref={railRef}>
-            <div className="absolute left-1/2 -translate-x-1/2 top-1.5 bottom-1.5 w-0.5 bg-white/5">
+            <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 top-1.5 bottom-1.5 w-0.5 bg-white/5">
                 <div
                     ref={fillRef}
                     className="absolute left-0 top-0 w-full h-0 transition-[height] duration-500 ease-out"

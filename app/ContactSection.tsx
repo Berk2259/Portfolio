@@ -71,6 +71,53 @@ function ContactRow({
     );
 }
 
+function ContactLinks({ contactInfo }: { contactInfo: ContactInfo | null }) {
+    return (
+        <>
+            {contactInfo?.email && (
+                <ContactRow
+                    delay={0}
+                    href={`mailto:${contactInfo.email}`}
+                    label="E-posta"
+                    value={contactInfo.email}
+                    icon={
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2}>
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="M3 7l9 6 9-6" />
+                        </svg>
+                    }
+                />
+            )}
+            {contactInfo?.github_url && (
+                <ContactRow
+                    delay={0.5}
+                    href={contactInfo.github_url}
+                    label="GitHub"
+                    value={contactInfo.github_url.replace(/^https?:\/\//, "")}
+                    icon={
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.5 2.87 8.32 6.84 9.67.5.1.68-.22.68-.5 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.24 9.24 0 0 1 5 0c1.9-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .28.18.61.69.5A10.03 10.03 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+                        </svg>
+                    }
+                />
+            )}
+            {contactInfo?.linkedin_url && (
+                <ContactRow
+                    delay={1}
+                    href={contactInfo.linkedin_url}
+                    label="LinkedIn"
+                    value={contactInfo.linkedin_url.replace(/^https?:\/\//, "")}
+                    icon={
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="#fff">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    }
+                />
+            )}
+        </>
+    );
+}
+
 export default function ContactSection({
     profile,
     contactInfo,
@@ -98,7 +145,7 @@ export default function ContactSection({
                 </span>
             </div>
 
-            <div className="relative z-[1] grid grid-cols-1 items-start gap-32 md:grid-cols-[auto_1fr]">
+            <div className="relative z-[1] grid grid-cols-1 items-start gap-10 md:grid-cols-[auto_1fr] md:gap-10 lg:gap-32">
                 <div>
                     <h2 className="mb-4 bg-gradient-to-br from-white via-purple-300 to-fuchsia-300 bg-clip-text text-[36px] font-extrabold leading-tight text-transparent">
                         {contactInfo?.heading || "Birlikte bir şeyler inşa edelim"}
@@ -136,51 +183,16 @@ export default function ContactSection({
                     </a>
                 </div>
 
-                <div className="flex items-stretch gap-16">
-                    <div className="flex max-w-[560px] flex-1 flex-col gap-3">
-                        {contactInfo?.email && (
-                            <ContactRow
-                                delay={0}
-                                href={`mailto:${contactInfo.email}`}
-                                label="E-posta"
-                                value={contactInfo.email}
-                                icon={
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2}>
-                                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                                        <path d="M3 7l9 6 9-6" />
-                                    </svg>
-                                }
-                            />
-                        )}
-                        {contactInfo?.github_url && (
-                            <ContactRow
-                                delay={0.5}
-                                href={contactInfo.github_url}
-                                label="GitHub"
-                                value={contactInfo.github_url.replace(/^https?:\/\//, "")}
-                                icon={
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
-                                        <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.5 2.87 8.32 6.84 9.67.5.1.68-.22.68-.5 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.24 9.24 0 0 1 5 0c1.9-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .28.18.61.69.5A10.03 10.03 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
-                                    </svg>
-                                }
-                            />
-                        )}
-                        {contactInfo?.linkedin_url && (
-                            <ContactRow
-                                delay={1}
-                                href={contactInfo.linkedin_url}
-                                label="LinkedIn"
-                                value={contactInfo.linkedin_url.replace(/^https?:\/\//, "")}
-                                icon={
-                                    <svg width="19" height="19" viewBox="0 0 24 24" fill="#fff">
-                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                                    </svg>
-                                }
-                            />
-                        )}
+                <div className="order-2 md:order-1 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16">
+                    <div className="hidden lg:flex max-w-[560px] flex-1 flex-col gap-3">
+                        <ContactLinks contactInfo={contactInfo} />
                     </div>
 
                     <QuizBlob questions={quizQuestions} />
+                </div>
+
+                <div className="order-1 md:order-2 flex flex-col gap-3 md:col-span-2 lg:hidden">
+                    <ContactLinks contactInfo={contactInfo} />
                 </div>
             </div>
         </div>
@@ -220,12 +232,12 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
         feedback === "correct"
             ? "0 0 30px 8px rgba(74,222,128,0.55)"
             : feedback === "wrong"
-              ? "0 0 30px 8px rgba(248,113,113,0.5)"
-              : "0 0 30px 6px rgba(168,85,247,0.4)";
+                ? "0 0 30px 8px rgba(248,113,113,0.5)"
+                : "0 0 30px 6px rgba(168,85,247,0.4)";
 
     return (
-        <div className="flex items-start gap-4 shrink-0">
-            <div className="flex w-[130px] shrink-0 flex-col items-center gap-2.5">
+        <div className="flex w-full max-w-[480px] items-start gap-4 shrink-0 md:flex-col md:items-stretch lg:flex-row lg:items-start">
+            <div className="flex w-[112px] sm:w-[130px] md:w-full lg:w-[130px] shrink-0 flex-col items-center gap-2.5">
                 <div
                     onClick={handleNewQuestion}
                     className="h-[72px] w-[72px] cursor-pointer shrink-0"
@@ -246,7 +258,7 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                     <p
                         key={current.id}
                         style={{ animation: "contactCardIn 0.38s cubic-bezier(.22,1,.36,1) both" }}
-                        className="text-center text-[12.5px] font-bold leading-snug text-zinc-100"
+                        className="text-center text-[11.5px] font-bold leading-relaxed text-zinc-100"
                     >
                         {current.question}
                     </p>
@@ -254,7 +266,7 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
             </div>
 
             {current && (
-                <div className="flex min-w-[170px] flex-1 flex-col gap-2 pt-0.5">
+                <div className="flex min-w-0 flex-1 flex-col gap-2 pt-0.5 md:w-full lg:flex-1">
                     {LETTERS.map((letter, i) => {
                         const isCorrect = selected !== null && letter === current.correct_option;
                         const isWrong = selected === letter && letter !== current.correct_option;
@@ -265,28 +277,25 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                                 disabled={selected !== null}
                                 onClick={() => setSelected(letter)}
                                 style={{
-                                    animation: `contactOptIn 0.3s ease ${i * 0.06}s both${
-                                        isCorrect ? ", contactPop 0.3s ease" : ""
-                                    }`,
+                                    animation: `contactOptIn 0.3s ease ${i * 0.06}s both${isCorrect ? ", contactPop 0.3s ease" : ""
+                                        }`,
                                 }}
-                                className={`flex w-full items-center gap-2.5 rounded-[10px] border px-3 py-2.5 text-left text-[12.5px] transition-colors ${
-                                    isCorrect
-                                        ? "border-green-400/60 bg-green-400/10 text-green-200"
-                                        : isWrong
-                                          ? "border-red-400/60 bg-red-400/10 text-red-200"
-                                          : selected !== null
+                                className={`flex w-full items-center gap-2.5 rounded-[10px] border px-3 py-2.5 text-left text-[12.5px] transition-colors ${isCorrect
+                                    ? "border-green-400/60 bg-green-400/10 text-green-200"
+                                    : isWrong
+                                        ? "border-red-400/60 bg-red-400/10 text-red-200"
+                                        : selected !== null
                                             ? "border-white/10 bg-white/[0.03] text-zinc-500"
                                             : "border-white/10 bg-white/[0.03] text-zinc-300 hover:border-purple-400/50 hover:bg-purple-400/[0.08]"
-                                }`}
+                                    }`}
                             >
                                 <span
-                                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] text-[10.5px] font-extrabold ${
-                                        isCorrect
-                                            ? "bg-green-400/25 text-green-400"
-                                            : isWrong
-                                              ? "bg-red-400/25 text-red-400"
-                                              : "bg-white/[0.06] text-zinc-400"
-                                    }`}
+                                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] text-[10.5px] font-extrabold ${isCorrect
+                                        ? "bg-green-400/25 text-green-400"
+                                        : isWrong
+                                            ? "bg-red-400/25 text-red-400"
+                                            : "bg-white/[0.06] text-zinc-400"
+                                        }`}
                                 >
                                     {letter.toUpperCase()}
                                 </span>
@@ -298,9 +307,8 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                     {selected !== null && (
                         <>
                             <p
-                                className={`min-h-[16px] text-xs font-bold ${
-                                    feedback === "correct" ? "text-green-400" : "text-red-400"
-                                }`}
+                                className={`min-h-[16px] text-xs font-bold ${feedback === "correct" ? "text-green-400" : "text-red-400"
+                                    }`}
                             >
                                 {feedback === "correct"
                                     ? "✓ Doğru bildin!"

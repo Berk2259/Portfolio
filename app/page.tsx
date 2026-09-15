@@ -50,7 +50,7 @@ export default async function Home() {
   return (
     <div>
       <section
-        className="relative overflow-hidden min-h-[90vh] flex items-center justify-start"
+        className="relative overflow-hidden min-h-[90vh] flex flex-col lg:flex-row items-center justify-center lg:justify-start"
         style={{
           background:
             "linear-gradient(180deg, #0d1526 0%, #131e36 45%, #0a0e1a 100%)",
@@ -78,7 +78,7 @@ export default async function Home() {
 
         <TechFloat skills={skills ?? []} />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-16 px-6 md:pl-50 max-w-10xl text-center md:text-left">
+        <div className="order-1 lg:order-none relative z-10 flex flex-col md:flex-row items-center gap-16 px-6 pt-14 lg:pt-0 md:pl-12 lg:pl-50 max-w-10xl text-center md:text-left">
           <div className="relative shrink-0 animate-fade-in-up">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 blur-2xl opacity-40 scale-105" />
             {profile?.avatar_url ? (
@@ -128,10 +128,10 @@ export default async function Home() {
       </section>
 
       {/* DİĞER BÖLÜMLER */}
-      <div className="w-full px-6 md:px-32 py-16 space-y-16">
+      <div className="w-full px-6 md:px-12 lg:px-32 py-16 space-y-16">
         <section id="egitim">
           <h2 className="text-3xl font-semibold mb-8">Eğitim</h2>
-          <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
             <ul className="relative border-l-2 border-gradient-to-b space-y-10 pl-8 max-w-2xl">
               {educations?.map((edu, i) => (
                 <li
@@ -170,7 +170,7 @@ export default async function Home() {
             </ul>
 
             {/* FOTOĞRAF STACK */}
-            <div className="ml-auto">
+            <div className="w-full lg:w-auto lg:ml-auto">
               <PhotoStack photos={gallery ?? []} />
             </div>
           </div>

@@ -298,3 +298,18 @@ body {
   40% { transform: scale(1.04); }
   100% { transform: scale(1); }
 }
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .project-photo-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}

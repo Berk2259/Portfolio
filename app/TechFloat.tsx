@@ -9,15 +9,9 @@ export default function TechFloat({ skills }: { skills: Skill[] }) {
 
     return (
         <div
-            className="absolute bottom-16 left-0 w-full overflow-hidden px-6 md:pl-50"
-            style={{
-                maskImage:
-                    "linear-gradient(to right, transparent, black 15%, black 85%, transparent)",
-                WebkitMaskImage:
-                    "linear-gradient(to right, transparent, black 15%, black 85%, transparent)",
-            }}
+            className="order-2 lg:order-none static lg:absolute lg:bottom-16 left-0 w-full overflow-hidden px-6 md:pl-12 lg:pl-50 mt-10 lg:mt-0 lg:[mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]"
         >
-            <div className="relative flex items-center justify-start gap-8 w-full">
+            <div className="relative flex flex-wrap items-center justify-center gap-x-4 gap-y-3 lg:flex-nowrap lg:justify-start lg:gap-8 w-full">
                 {skills.map((skill) => (
                     <div
                         key={skill.id}
@@ -27,10 +21,10 @@ export default function TechFloat({ skills }: { skills: Skill[] }) {
                             <img
                                 src={skill.logo_url}
                                 alt={skill.name}
-                                className="w-12 h-12 object-contain drop-shadow-lg"
+                                className="w-8 h-8 md:w-12 md:h-12 object-contain drop-shadow-lg"
                             />
                         )}
-                        <span className="text-xs text-white/70">{skill.name}</span>
+                        <span className="text-[10px] md:text-xs text-white/70">{skill.name}</span>
                     </div>
                 ))}
             </div>

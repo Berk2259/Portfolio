@@ -318,9 +318,9 @@ export default function ProjectsShowcase({
     const photos = projectPhotos.filter((p) => p.project_id === selected.id);
 
     return (
-        <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* LİSTE */}
-            <div className="flex flex-col gap-4 w-full md:w-130 shrink-0">
+            <div className="flex flex-col gap-4 w-full lg:w-130 lg:shrink-0">
                 {projects.map((project, i) => (
                     <button
                         key={project.id}
@@ -397,7 +397,7 @@ export default function ProjectsShowcase({
 
                     {photos.length > 0 && (
                         <div
-                            className="grid gap-3 mb-6"
+                            className="project-photo-grid grid gap-3 mb-6"
                             style={{
                                 gridTemplateColumns: `repeat(${photos.length}, 1fr)`,
                             }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type Photo = {
     id: string;
@@ -9,6 +9,28 @@ type Photo = {
 
 export default function PhotoStack({ photos }: { photos: Photo[] }) {
     const [expanded, setExpanded] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const drag = useRef({ startX: 0, scrollLeft: 0 });
+
+    function handleMouseDown(e: React.MouseEvent) {
+        const el = scrollRef.current;
+        if (!el) return;
+        drag.current = { startX: e.pageX, scrollLeft: el.scrollLeft };
+
+        function handleMouseMove(ev: MouseEvent) {
+            if (!el) return;
+            const delta = ev.pageX - drag.current.startX;
+            el.scrollLeft = drag.current.scrollLeft - delta;
+        }
+
+        function handleMouseUp() {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
+        }
+
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+    }
 
     const collapsedPositions = [
         "rotate-[-8deg] top-0 left-0",
@@ -27,24 +49,44 @@ export default function PhotoStack({ photos }: { photos: Photo[] }) {
     if (!photos || photos.length === 0) return null;
 
     return (
-        <div
-            onClick={() => setExpanded(!expanded)}
-            className="relative hidden md:block w-[700px] h-[700px] shrink-0 mt-4 cursor-pointer"
-        >
-            {photos.map((photo, i) => {
-                const pos = expanded
-                    ? expandedPositions[i % expandedPositions.length]
-                    : collapsedPositions[i % collapsedPositions.length];
-                return (
+        <>
+            {/* Mobil/tablet: yatay kaydırmalı galeri */}
+            <div
+                ref={scrollRef}
+                onMouseDown={handleMouseDown}
+                className="flex lg:hidden gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing select-none"
+            >
+                {photos.map((photo) => (
                     <img
                         key={photo.id}
                         src={photo.image_url}
                         alt="Galeri fotoğrafı"
-                        className={`absolute w-80 h-80 object-cover rounded-xl shadow-2xl ring-4 ring-black/40 transition-all duration-500 ease-in-out ${pos}`}
-                        style={{ zIndex: expanded ? i : photos.length - i }}
+                        draggable={false}
+                        className="w-44 h-44 sm:w-52 sm:h-52 shrink-0 snap-start object-cover rounded-xl shadow-xl ring-2 ring-white/10"
                     />
-                );
-            })}
-        </div>
+                ))}
+            </div>
+
+            {/* Masaüstü: döndürülmüş kart yığını */}
+            <div
+                onClick={() => setExpanded(!expanded)}
+                className="relative hidden lg:block w-[700px] h-[700px] shrink-0 mt-4 cursor-pointer"
+            >
+                {photos.map((photo, i) => {
+                    const pos = expanded
+                        ? expandedPositions[i % expandedPositions.length]
+                        : collapsedPositions[i % collapsedPositions.length];
+                    return (
+                        <img
+                            key={photo.id}
+                            src={photo.image_url}
+                            alt="Galeri fotoğrafı"
+                            className={`absolute w-80 h-80 object-cover rounded-xl shadow-2xl ring-4 ring-black/40 transition-all duration-500 ease-in-out ${pos}`}
+                            style={{ zIndex: expanded ? i : photos.length - i }}
+                        />
+                    );
+                })}
+            </div>
+        </>
     );
 }
