@@ -7,45 +7,49 @@ import ExperienceTimeline from "./ExperienceTimeline";
 import ContactSection from "./ContactSection";
 
 export default async function Home() {
-  const { data: projects } = await supabase.from("projects").select("*");
-  const { data: profile } = await supabase
-    .from("profile")
-    .select("*")
-    .single();
-  const { data: educations } = await supabase
-    .from("education")
-    .select("*")
-    .order("created_at", { ascending: true });
-  const { data: gallery } = await supabase
-    .from("gallery")
-    .select("*")
-    .order("created_at", { ascending: true });
-  const { data: experiences } = await supabase
-    .from("experience")
-    .select("*")
-    .order("created_at", { ascending: false });
-  const { data: experiencePhotos } = await supabase
-    .from("experience_photos")
-    .select("*")
-    .order("created_at", { ascending: true });
-  const { data: experienceSkills } = await supabase
-    .from("experience_skills")
-    .select("*");
-  const { data: contactInfo } = await supabase
-    .from("contact_info")
-    .select("*")
-    .single();
-  const { data: quizQuestions } = await supabase
-    .from("contact_quiz_questions")
-    .select("*");
-  const { data: skills } = await supabase
-    .from("skills")
-    .select("*")
-    .order("created_at", { ascending: true });
-  const { data: projectPhotos } = await supabase
-    .from("project_photos")
-    .select("*")
-    .order("created_at", { ascending: true });
+  const [
+    { data: projects },
+    { data: profile },
+    { data: educations },
+    { data: gallery },
+    { data: experiences },
+    { data: experiencePhotos },
+    { data: experienceSkills },
+    { data: contactInfo },
+    { data: quizQuestions },
+    { data: skills },
+    { data: projectPhotos },
+  ] = await Promise.all([
+    supabase.from("projects").select("*"),
+    supabase.from("profile").select("*").single(),
+    supabase
+      .from("education")
+      .select("*")
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("gallery")
+      .select("*")
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("experience")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("experience_photos")
+      .select("*")
+      .order("created_at", { ascending: true }),
+    supabase.from("experience_skills").select("*"),
+    supabase.from("contact_info").select("*").single(),
+    supabase.from("contact_quiz_questions").select("*"),
+    supabase
+      .from("skills")
+      .select("*")
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("project_photos")
+      .select("*")
+      .order("created_at", { ascending: true }),
+  ]);
 
   return (
     <div>
