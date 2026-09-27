@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { getDictionary, localize } from "@/app/i18n";
+
 type Profile = {
     id: number;
     name: string | null;
@@ -16,8 +18,11 @@ type ContactInfo = {
     github_url: string | null;
     linkedin_url: string | null;
     cv_url: string | null;
+    cv_url_en: string | null;
     heading: string | null;
+    heading_en: string | null;
     description: string | null;
+    description_en: string | null;
 };
 
 type QuizQuestion = {
@@ -71,14 +76,15 @@ function ContactRow({
     );
 }
 
-function ContactLinks({ contactInfo }: { contactInfo: ContactInfo | null }) {
+function ContactLinks({ contactInfo, locale }: { contactInfo: ContactInfo | null; locale: string }) {
+    const dict = getDictionary(locale);
     return (
         <>
             {contactInfo?.email && (
                 <ContactRow
                     delay={0}
                     href={`mailto:${contactInfo.email}`}
-                    label="E-posta"
+                    label={dict.contactRowEmail}
                     value={contactInfo.email}
                     icon={
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2}>
@@ -125,6 +131,7 @@ export default function ContactSection({
     projectCount,
     experienceCount,
     skillCount,
+    locale,
 }: {
     profile: Profile | null;
     contactInfo: ContactInfo | null;
@@ -132,67 +139,69 @@ export default function ContactSection({
     projectCount: number;
     experienceCount: number;
     skillCount: number;
+    locale: string;
 }) {
     if (!profile) return null;
+
+    const dict = getDictionary(locale);
 
     return (
         <div className="relative">
 
             <div className="relative z-[1] mb-10 text-left">
-                <h2 className="text-3xl font-semibold mb-2">İletişim</h2>
+                <h2 className="text-3xl font-semibold mb-2">{dict.contactHeading}</h2>
                 <span className="text-xs font-semibold uppercase tracking-[0.18em] text-purple-400">
-                    Birlikte Çalışalım
+                    {dict.contactEyebrow}
                 </span>
             </div>
 
             <div className="relative z-[1] grid grid-cols-1 items-start gap-10 md:grid-cols-[auto_1fr] md:gap-10 lg:gap-32">
                 <div>
                     <h2 className="mb-4 bg-gradient-to-br from-white via-purple-300 to-fuchsia-300 bg-clip-text text-[36px] font-extrabold leading-tight text-transparent">
-                        {contactInfo?.heading || "Birlikte bir şeyler inşa edelim"}
+                        {localize(contactInfo, "heading", locale) || dict.defaultContactHeading}
                     </h2>
                     <p className="mb-7 max-w-[420px] text-[14.5px] leading-[1.75] text-zinc-400">
-                        {contactInfo?.description ||
-                            "Bir staj/iş fırsatı sunmak, projeni birlikte konuşmak ya da sadece merhaba demek istersen, aşağıdaki kanallardan bana ulaşabilirsin. Genelde 24 saat içinde dönüş yaparım."}
+                        {localize(contactInfo, "description", locale) || dict.defaultContactDescription}
                     </p>
 
                     <div className="mb-7 flex max-w-[420px] gap-3">
                         <div className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-2.5 py-3.5 text-center">
                             <div className="text-xl font-extrabold text-white">{projectCount}</div>
-                            <div className="mt-0.5 text-[10.5px] text-zinc-400">Proje</div>
+                            <div className="mt-0.5 text-[10.5px] text-zinc-400">{dict.statsProject}</div>
                         </div>
                         <div className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-2.5 py-3.5 text-center">
                             <div className="text-xl font-extrabold text-white">{experienceCount}</div>
-                            <div className="mt-0.5 text-[10.5px] text-zinc-400">Deneyim</div>
+                            <div className="mt-0.5 text-[10.5px] text-zinc-400">{dict.statsExperience}</div>
                         </div>
                         <div className="flex-1 rounded-2xl border border-white/8 bg-white/[0.03] px-2.5 py-3.5 text-center">
                             <div className="text-xl font-extrabold text-white">{skillCount}</div>
-                            <div className="mt-0.5 text-[10.5px] text-zinc-400">Teknoloji</div>
+                            <div className="mt-0.5 text-[10.5px] text-zinc-400">{dict.statsTech}</div>
                         </div>
                     </div>
 
                     <a
-                        href={contactInfo?.cv_url || "#"}
-                        target={contactInfo?.cv_url ? "_blank" : undefined}
-                        rel={contactInfo?.cv_url ? "noopener noreferrer" : undefined}
+                        href={localize(contactInfo, "cv_url", locale) || "#"}
+                        target={localize(contactInfo, "cv_url", locale) ? "_blank" : undefined}
+                        rel={localize(contactInfo, "cv_url", locale) ? "noopener noreferrer" : undefined}
                         className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:border-purple-400/50 hover:bg-purple-400/10"
                     >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ededed" strokeWidth={2}>
                             <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" />
                         </svg>
-                        CV İndir
+                        {dict.cvDownload}
                     </a>
                 </div>
 
                 <div className="order-2 md:order-1 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16">
                     <div className="hidden lg:flex max-w-[560px] flex-1 flex-col gap-3">
-                        <ContactLinks contactInfo={contactInfo} />
+                        <ContactLinks contactInfo={contactInfo} locale={locale} />
                     </div>
 
-                    <QuizBlob questions={quizQuestions} />
+                    <QuizBlob questions={quizQuestions} locale={locale} />
                 </div>
 
                 <div className="order-1 md:order-2 flex flex-col gap-3 md:col-span-2 lg:hidden">
-                    <ContactLinks contactInfo={contactInfo} />
+                    <ContactLinks contactInfo={contactInfo} locale={locale} />
                 </div>
             </div>
         </div>
@@ -203,7 +212,8 @@ export default function ContactSection({
 
 const LETTERS = ["a", "b", "c", "d"] as const;
 
-function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
+function QuizBlob({ questions, locale }: { questions: QuizQuestion[]; locale: string }) {
+    const dict = getDictionary(locale);
     const [wobbling, setWobbling] = useState(false);
     const [current, setCurrent] = useState<QuizQuestion | null>(null);
     const [selected, setSelected] = useState<"a" | "b" | "c" | "d" | null>(null);
@@ -235,6 +245,10 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                 ? "0 0 30px 8px rgba(248,113,113,0.5)"
                 : "0 0 30px 6px rgba(168,85,247,0.4)";
 
+    const questionText = current ? localize(current, "question", locale) : null;
+    const optionLetterField = (letter: string) =>
+        (localize(current, `option_${letter}`, locale) ?? "") as string;
+
     return (
         <div className="flex w-full max-w-[480px] items-start gap-4 shrink-0 md:flex-col md:items-stretch lg:flex-row lg:items-start">
             <div className="flex w-[112px] sm:w-[130px] md:w-full lg:w-[130px] shrink-0 flex-col items-center gap-2.5">
@@ -252,7 +266,7 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                 />
                 {!current ? (
                     <p className="text-center text-xs leading-relaxed text-zinc-400">
-                        Küçük bir soruyla beni tanı — blob&apos;a tıkla 👆
+                        {dict.quizPlaceholder}
                     </p>
                 ) : (
                     <p
@@ -260,7 +274,7 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                         style={{ animation: "contactCardIn 0.38s cubic-bezier(.22,1,.36,1) both" }}
                         className="text-center text-[11.5px] font-bold leading-relaxed text-zinc-100"
                     >
-                        {current.question}
+                        {questionText}
                     </p>
                 )}
             </div>
@@ -299,7 +313,7 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                                 >
                                     {letter.toUpperCase()}
                                 </span>
-                                {current[`option_${letter}`]}
+                                {optionLetterField(letter)}
                             </button>
                         );
                     })}
@@ -311,11 +325,11 @@ function QuizBlob({ questions }: { questions: QuizQuestion[] }) {
                                     }`}
                             >
                                 {feedback === "correct"
-                                    ? "✓ Doğru bildin!"
-                                    : `✗ Yanlış, doğru cevap: ${current[`option_${current.correct_option}`]}`}
+                                    ? dict.quizCorrect
+                                    : `${dict.quizWrongPrefix}${optionLetterField(current.correct_option)}`}
                             </p>
                             <p className="text-[10.5px] text-zinc-500">
-                                Yeni soru için blob&apos;a tekrar tıkla ↻
+                                {dict.quizRetry}
                             </p>
                         </>
                     )}

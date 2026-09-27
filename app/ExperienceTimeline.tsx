@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { localize } from "@/app/i18n";
 
 type Experience = {
     id: string;
@@ -59,7 +60,7 @@ function parseMonthYear(value: string | null): { y: number; m: number } | null {
     return { m: Number(match[1]), y: Number(match[2]) };
 }
 
-function formatDuration(start: string | null, end: string | null) {
+function formatDuration(start: string | null, end: string | null, locale: string) {
     const s = parseMonthYear(start);
     if (!s) return null;
 
@@ -77,9 +78,11 @@ function formatDuration(start: string | null, end: string | null) {
     if (months < 1) months = 1;
     const y = Math.floor(months / 12);
     const m = months % 12;
+    const yearLabel = locale === "en" ? (y === 1 ? "year" : "years") : "yıl";
+    const monthLabel = locale === "en" ? (m === 1 ? "month" : "months") : "ay";
     const parts: string[] = [];
-    if (y > 0) parts.push(`${y} yıl`);
-    if (m > 0 || y === 0) parts.push(`${m} ay`);
+    if (y > 0) parts.push(`${y} ${yearLabel}`);
+    if (m > 0 || y === 0) parts.push(`${m} ${monthLabel}`);
     return parts.join(" ");
 }
 
@@ -166,11 +169,13 @@ function TimelineItem({
     photos,
     index,
     skills,
+    locale,
 }: {
     exp: Experience;
     photos: ExperiencePhoto[];
     index: number;
     skills: Skill[];
+    locale: string;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [active, setActive] = useState(false);
@@ -192,13 +197,13 @@ function TimelineItem({
 
     const { c1, c2 } = PALETTE[index % PALETTE.length];
     const ongoing = isOngoing(exp.end_date);
-    const duration = formatDuration(exp.start_date, exp.end_date);
+    const duration = formatDuration(exp.start_date, exp.end_date, locale);
     const icon = pickIcon(`${exp.position ?? ""} ${exp.company ?? ""}`);
     const cardOnLeft = index % 2 === 0;
     const tilt = index % 2 === 0 ? -3 : 2.4;
 
     const bullets =
-        exp.description
+        localize(exp, "description", locale)
             ?.split("•")
             .map((s) => s.trim())
             .filter((s) => s.length > 0) ?? [];
@@ -230,7 +235,7 @@ function TimelineItem({
                             {icon}
                         </span>
                         <span className="font-bold text-white text-[17.5px]">
-                            {exp.position || exp.company}
+                            {localize(exp, "position", locale) || exp.company}
                         </span>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
@@ -241,7 +246,7 @@ function TimelineItem({
                                     background: `linear-gradient(90deg, ${c1}, ${c2})`,
                                 }}
                             >
-                                {exp.start_date} – {ongoing ? "Halen" : exp.end_date}
+                                {exp.start_date} – {ongoing ? (locale === "en" ? "Present" : "Halen") : exp.end_date}
                             </span>
                         )}
                         {duration && (
@@ -251,7 +256,7 @@ function TimelineItem({
                 </div>
                 <p className="text-[12.5px] text-zinc-400 mt-1 mb-4">
                     {exp.company}
-                    {exp.work_type && ` • ${exp.work_type}`}
+                    {exp.work_type && ` • ${localize(exp, "work_type", locale)}`}
                 </p>
                 {bullets.length > 0 && (
                     <ul className="space-y-2.5">
@@ -318,10 +323,10 @@ function TimelineItem({
                 className="text-[9.5px] tracking-[0.12em] uppercase font-bold mb-3.5"
                 style={{ color: c1 }}
             >
-                Öne Çıkan Başarı
+                {locale === "en" ? "Key Achievements" : "Öne Çıkan Başarı"}
             </p>
             <ul className="flex flex-col gap-3">
-                {exp.highlight
+                {localize(exp, "highlight", locale)
                     ?.split("\n")
                     .map((line) => line.trim())
                     .filter((line) => line.length > 0)
@@ -358,7 +363,7 @@ function TimelineItem({
             tilt={tilt}
             c1={c1}
             c2={c2}
-            workType={exp.work_type}
+            workType={localize(exp, "work_type", locale)}
         />
     );
 
@@ -443,11 +448,13 @@ export default function ExperienceTimeline({
     experiencePhotos,
     experienceSkills,
     skills,
+    locale,
 }: {
     experiences: Experience[];
     experiencePhotos: ExperiencePhoto[];
     experienceSkills: ExperienceSkillLink[];
     skills: Skill[];
+    locale: string;
 }) {
     const railRef = useRef<HTMLDivElement>(null);
     const fillRef = useRef<HTMLDivElement>(null);
@@ -494,6 +501,7 @@ export default function ExperienceTimeline({
                         .map((es) => skills.find((s) => s.id === es.skill_id))
                         .filter((s): s is Skill => Boolean(s))}
                     index={i}
+                    locale={locale}
                 />
             ))}
         </div>

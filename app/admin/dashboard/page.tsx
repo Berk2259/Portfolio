@@ -8,25 +8,31 @@ import type { User } from "@supabase/supabase-js";
 type Project = {
     id: string;
     title: string;
+    title_en: string | null;
     description: string | null;
+    description_en: string | null;
     image_url: string | null;
     project_url: string | null;
     tech_stack: string | null;
     github_url: string | null;
     terminal_log: string | null;
+    terminal_log_en: string | null;
     terminal_build_cmd: string | null;
     terminal_second_cmd: string | null;
     terminal_second_log: string | null;
+    terminal_second_log_en: string | null;
 };
 
 type Education = {
     id: string;
     school: string;
     degree: string | null;
+    degree_en: string | null;
     start_year: string | null;
     end_year: string | null;
     description: string | null;
-};
+    description_en: string | null;
+};;
 
 type GalleryPhoto = {
     id: string;
@@ -37,8 +43,11 @@ type Profile = {
     id: number;
     name: string | null;
     title: string | null;
+    title_en: string | null;
     bio: string | null;
+    bio_en: string | null;
     badge_text: string | null;
+    badge_text_en: string | null;
     avatar_url: string | null;
 };
 
@@ -46,11 +55,15 @@ type Experience = {
     id: string;
     company: string;
     position: string | null;
+    position_en: string | null;
     start_date: string | null;
     end_date: string | null;
     description: string | null;
+    description_en: string | null;
     work_type: string | null;
+    work_type_en: string | null;
     highlight: string | null;
+    highlight_en: string | null;
 };
 
 type ExperiencePhoto = {
@@ -71,17 +84,25 @@ type ContactInfo = {
     github_url: string | null;
     linkedin_url: string | null;
     cv_url: string | null;
+    cv_url_en: string | null;
     heading: string | null;
+    heading_en: string | null;
     description: string | null;
+    description_en: string | null;
 };
 
 type QuizQuestion = {
     id: string;
     question: string;
+    question_en: string | null;
     option_a: string;
+    option_a_en: string | null;
     option_b: string;
+    option_b_en: string | null;
     option_c: string;
+    option_c_en: string | null;
     option_d: string;
+    option_d_en: string | null;
     correct_option: "a" | "b" | "c" | "d";
 };
 
@@ -136,16 +157,20 @@ export default function Dashboard() {
 
     const [projects, setProjects] = useState<Project[]>([]);
     const [title, setTitle] = useState("");
+    const [titleEn, setTitleEn] = useState("");
     const [description, setDescription] = useState("");
+    const [descriptionEn, setDescriptionEn] = useState("");
     const [projectUrl, setProjectUrl] = useState("");
     const [profile, setProfile] = useState<Profile | null>(null);
     const [profileSaved, setProfileSaved] = useState(false);
     const [educations, setEducations] = useState<Education[]>([]);
     const [school, setSchool] = useState("");
     const [degree, setDegree] = useState("");
+    const [degreeEn, setDegreeEn] = useState("");
     const [startYear, setStartYear] = useState("");
     const [endYear, setEndYear] = useState("");
     const [eduDescription, setEduDescription] = useState("");
+    const [eduDescriptionEn, setEduDescriptionEn] = useState("");
     const [editingEducationId, setEditingEducationId] = useState<string | null>(
         null
     );
@@ -153,11 +178,15 @@ export default function Dashboard() {
     const [experiences, setExperiences] = useState<Experience[]>([]);
     const [company, setCompany] = useState("");
     const [position, setPosition] = useState("");
+    const [positionEn, setPositionEn] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [expDescription, setExpDescription] = useState("");
+    const [expDescriptionEn, setExpDescriptionEn] = useState("");
     const [workType, setWorkType] = useState("");
+    const [workTypeEn, setWorkTypeEn] = useState("");
     const [expHighlight, setExpHighlight] = useState("");
+    const [expHighlightEn, setExpHighlightEn] = useState("");
     const [editingExperienceId, setEditingExperienceId] = useState<
         string | null
     >(null);
@@ -174,10 +203,15 @@ export default function Dashboard() {
     const [contactSaved, setContactSaved] = useState(false);
     const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
     const [quizQuestion, setQuizQuestion] = useState("");
+    const [quizQuestionEn, setQuizQuestionEn] = useState("");
     const [quizOptionA, setQuizOptionA] = useState("");
+    const [quizOptionAEn, setQuizOptionAEn] = useState("");
     const [quizOptionB, setQuizOptionB] = useState("");
+    const [quizOptionBEn, setQuizOptionBEn] = useState("");
     const [quizOptionC, setQuizOptionC] = useState("");
+    const [quizOptionCEn, setQuizOptionCEn] = useState("");
     const [quizOptionD, setQuizOptionD] = useState("");
+    const [quizOptionDEn, setQuizOptionDEn] = useState("");
     const [quizCorrectOption, setQuizCorrectOption] = useState<
         "a" | "b" | "c" | "d"
     >("a");
@@ -190,9 +224,11 @@ export default function Dashboard() {
     const [projectGithubUrl, setProjectGithubUrl] = useState("");
     const [projectPhotos, setProjectPhotos] = useState<ProjectPhoto[]>([]);
     const [terminalLog, setTerminalLog] = useState("");
+    const [terminalLogEn, setTerminalLogEn] = useState("");
     const [terminalBuildCmd, setTerminalBuildCmd] = useState("");
     const [terminalSecondCmd, setTerminalSecondCmd] = useState("");
     const [terminalSecondLog, setTerminalSecondLog] = useState("");
+    const [terminalSecondLogEn, setTerminalSecondLogEn] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -285,15 +321,21 @@ export default function Dashboard() {
                 github_url: contactInfo.github_url,
                 linkedin_url: contactInfo.linkedin_url,
                 cv_url: contactInfo.cv_url,
+                cv_url_en: contactInfo.cv_url_en,
                 heading: contactInfo.heading,
+                heading_en: contactInfo.heading_en,
                 description: contactInfo.description,
+                description_en: contactInfo.description_en,
             })
             .eq("id", 1);
         setContactSaved(true);
         setTimeout(() => setContactSaved(false), 2000);
     }
 
-    async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    async function handleCvUpload(
+        e: React.ChangeEvent<HTMLInputElement>,
+        field: "cv_url" | "cv_url_en" = "cv_url"
+    ) {
         const file = e.target.files?.[0];
         if (!file || !contactInfo) return;
 
@@ -309,7 +351,7 @@ export default function Dashboard() {
         }
 
         const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-        setContactInfo({ ...contactInfo, cv_url: data.publicUrl });
+        setContactInfo({ ...contactInfo, [field]: data.publicUrl });
     }
 
     async function loadQuizQuestions() {
@@ -328,10 +370,15 @@ export default function Dashboard() {
                 .from("contact_quiz_questions")
                 .update({
                     question: quizQuestion,
+                    question_en: quizQuestionEn,
                     option_a: quizOptionA,
+                    option_a_en: quizOptionAEn,
                     option_b: quizOptionB,
+                    option_b_en: quizOptionBEn,
                     option_c: quizOptionC,
+                    option_c_en: quizOptionCEn,
                     option_d: quizOptionD,
+                    option_d_en: quizOptionDEn,
                     correct_option: quizCorrectOption,
                 })
                 .eq("id", editingQuizId);
@@ -339,19 +386,29 @@ export default function Dashboard() {
         } else {
             await supabase.from("contact_quiz_questions").insert({
                 question: quizQuestion,
+                question_en: quizQuestionEn,
                 option_a: quizOptionA,
+                option_a_en: quizOptionAEn,
                 option_b: quizOptionB,
+                option_b_en: quizOptionBEn,
                 option_c: quizOptionC,
+                option_c_en: quizOptionCEn,
                 option_d: quizOptionD,
+                option_d_en: quizOptionDEn,
                 correct_option: quizCorrectOption,
             });
         }
 
         setQuizQuestion("");
+        setQuizQuestionEn("");
         setQuizOptionA("");
+        setQuizOptionAEn("");
         setQuizOptionB("");
+        setQuizOptionBEn("");
         setQuizOptionC("");
+        setQuizOptionCEn("");
         setQuizOptionD("");
+        setQuizOptionDEn("");
         setQuizCorrectOption("a");
         loadQuizQuestions();
     }
@@ -359,20 +416,30 @@ export default function Dashboard() {
     function handleEditQuizQuestion(q: QuizQuestion) {
         setEditingQuizId(q.id);
         setQuizQuestion(q.question);
+        setQuizQuestionEn(q.question_en ?? "");
         setQuizOptionA(q.option_a);
+        setQuizOptionAEn(q.option_a_en ?? "");
         setQuizOptionB(q.option_b);
+        setQuizOptionBEn(q.option_b_en ?? "");
         setQuizOptionC(q.option_c);
+        setQuizOptionCEn(q.option_c_en ?? "");
         setQuizOptionD(q.option_d);
+        setQuizOptionDEn(q.option_d_en ?? "");
         setQuizCorrectOption(q.correct_option);
     }
 
     function handleCancelEditQuiz() {
         setEditingQuizId(null);
         setQuizQuestion("");
+        setQuizQuestionEn("");
         setQuizOptionA("");
+        setQuizOptionAEn("");
         setQuizOptionB("");
+        setQuizOptionBEn("");
         setQuizOptionC("");
+        setQuizOptionCEn("");
         setQuizOptionD("");
+        setQuizOptionDEn("");
         setQuizCorrectOption("a");
     }
 
@@ -389,72 +456,92 @@ export default function Dashboard() {
                 .from("projects")
                 .update({
                     title,
+                    title_en: titleEn,
                     description,
+                    description_en: descriptionEn,
                     project_url: projectUrl,
                     image_url: projectImageUrl,
                     tech_stack: techStack,
                     github_url: projectGithubUrl,
                     terminal_log: terminalLog,
+                    terminal_log_en: terminalLogEn,
                     terminal_build_cmd: terminalBuildCmd,
                     terminal_second_cmd: terminalSecondCmd,
                     terminal_second_log: terminalSecondLog,
+                    terminal_second_log_en: terminalSecondLogEn,
                 })
                 .eq("id", editingProjectId);
             setEditingProjectId(null);
         } else {
             await supabase.from("projects").insert({
                 title,
+                title_en: titleEn,
                 description,
+                description_en: descriptionEn,
                 project_url: projectUrl,
                 image_url: projectImageUrl,
                 tech_stack: techStack,
                 github_url: projectGithubUrl,
                 terminal_log: terminalLog,
+                terminal_log_en: terminalLogEn,
                 terminal_build_cmd: terminalBuildCmd,
                 terminal_second_cmd: terminalSecondCmd,
                 terminal_second_log: terminalSecondLog,
+                terminal_second_log_en: terminalSecondLogEn,
             });
         }
 
         setTitle("");
+        setTitleEn("");
         setDescription("");
+        setDescriptionEn("");
         setProjectUrl("");
         setProjectImageUrl("");
         setTechStack("");
         setProjectGithubUrl("");
         setTerminalLog("");
+        setTerminalLogEn("");
         setTerminalBuildCmd("");
         setTerminalSecondCmd("");
         setTerminalSecondLog("");
+        setTerminalSecondLogEn("");
         loadProjects();
     }
 
     function handleEditProject(project: Project) {
         setEditingProjectId(project.id);
         setTitle(project.title);
+        setTitleEn(project.title_en ?? "");
         setDescription(project.description ?? "");
+        setDescriptionEn(project.description_en ?? "");
         setProjectUrl(project.project_url ?? "");
         setProjectImageUrl(project.image_url ?? "");
         setTechStack(project.tech_stack ?? "");
         setProjectGithubUrl(project.github_url ?? "");
         setTerminalBuildCmd(project.terminal_build_cmd ?? "");
         setTerminalLog(project.terminal_log ?? "");
+        setTerminalLogEn(project.terminal_log_en ?? "");
         setTerminalSecondCmd(project.terminal_second_cmd ?? "");
         setTerminalSecondLog(project.terminal_second_log ?? "");
+        setTerminalSecondLogEn(project.terminal_second_log_en ?? "");
     }
 
     function handleCancelEditProject() {
         setEditingProjectId(null);
         setTitle("");
+        setTitleEn("");
         setDescription("");
+        setDescriptionEn("");
         setProjectUrl("");
         setProjectImageUrl("");
         setTechStack("");
         setProjectGithubUrl("");
         setTerminalLog("");
+        setTerminalLogEn("");
         setTerminalBuildCmd("");
         setTerminalSecondCmd("");
         setTerminalSecondLog("");
+        setTerminalSecondLogEn("");
     }
 
     async function handleDelete(id: string) {
@@ -492,9 +579,11 @@ export default function Dashboard() {
                 .update({
                     school,
                     degree,
+                    degree_en: degreeEn,
                     start_year: startYear,
                     end_year: endYear,
                     description: eduDescription,
+                    description_en: eduDescriptionEn,
                 })
                 .eq("id", editingEducationId);
             setEditingEducationId(null);
@@ -502,17 +591,21 @@ export default function Dashboard() {
             await supabase.from("education").insert({
                 school,
                 degree,
+                degree_en: degreeEn,
                 start_year: startYear,
                 end_year: endYear,
                 description: eduDescription,
+                description_en: eduDescriptionEn,
             });
         }
 
         setSchool("");
         setDegree("");
+        setDegreeEn("");
         setStartYear("");
         setEndYear("");
         setEduDescription("");
+        setEduDescriptionEn("");
         loadEducations();
     }
 
@@ -520,20 +613,23 @@ export default function Dashboard() {
         setEditingEducationId(edu.id);
         setSchool(edu.school);
         setDegree(edu.degree ?? "");
+        setDegreeEn(edu.degree_en ?? "");
         setStartYear(edu.start_year ?? "");
         setEndYear(edu.end_year ?? "");
         setEduDescription(edu.description ?? "");
+        setEduDescriptionEn(edu.description_en ?? "");
     }
 
     function handleCancelEditEducation() {
         setEditingEducationId(null);
         setSchool("");
         setDegree("");
+        setDegreeEn("");
         setStartYear("");
         setEndYear("");
         setEduDescription("");
+        setEduDescriptionEn("");
     }
-
     async function loadExperiences() {
         const { data } = await supabase
             .from("experience")
@@ -553,11 +649,15 @@ export default function Dashboard() {
                 .update({
                     company,
                     position,
+                    position_en: positionEn,
                     start_date: startDate,
                     end_date: endDate,
                     description: expDescription,
+                    description_en: expDescriptionEn,
                     work_type: workType,
+                    work_type_en: workTypeEn,
                     highlight: expHighlight,
+                    highlight_en: expHighlightEn,
                 })
                 .eq("id", editingExperienceId);
             setEditingExperienceId(null);
@@ -567,11 +667,15 @@ export default function Dashboard() {
                 .insert({
                     company,
                     position,
+                    position_en: positionEn,
                     start_date: startDate,
                     end_date: endDate,
                     description: expDescription,
+                    description_en: expDescriptionEn,
                     work_type: workType,
+                    work_type_en: workTypeEn,
                     highlight: expHighlight,
+                    highlight_en: expHighlightEn,
                 })
                 .select()
                 .single();
@@ -596,11 +700,15 @@ export default function Dashboard() {
 
         setCompany("");
         setPosition("");
+        setPositionEn("");
         setStartDate("");
         setEndDate("");
         setExpDescription("");
+        setExpDescriptionEn("");
         setWorkType("");
+        setWorkTypeEn("");
         setExpHighlight("");
+        setExpHighlightEn("");
         setSelectedExpSkillIds([]);
         loadExperiences();
         loadExperienceSkills();
@@ -610,11 +718,15 @@ export default function Dashboard() {
         setEditingExperienceId(exp.id);
         setCompany(exp.company);
         setPosition(exp.position ?? "");
+        setPositionEn(exp.position_en ?? "");
         setStartDate(exp.start_date ?? "");
         setEndDate(exp.end_date ?? "");
         setExpDescription(exp.description ?? "");
+        setExpDescriptionEn(exp.description_en ?? "");
         setWorkType(exp.work_type ?? "");
+        setWorkTypeEn(exp.work_type_en ?? "");
         setExpHighlight(exp.highlight ?? "");
+        setExpHighlightEn(exp.highlight_en ?? "");
         setSelectedExpSkillIds(
             experienceSkills
                 .filter((es) => es.experience_id === exp.id)
@@ -626,11 +738,15 @@ export default function Dashboard() {
         setEditingExperienceId(null);
         setCompany("");
         setPosition("");
+        setPositionEn("");
         setStartDate("");
         setEndDate("");
         setExpDescription("");
+        setExpDescriptionEn("");
         setWorkType("");
+        setWorkTypeEn("");
         setExpHighlight("");
+        setExpHighlightEn("");
         setSelectedExpSkillIds([]);
     }
 
@@ -786,8 +902,11 @@ export default function Dashboard() {
             .update({
                 name: profile.name,
                 title: profile.title,
+                title_en: profile.title_en,
                 bio: profile.bio,
+                bio_en: profile.bio_en,
                 badge_text: profile.badge_text,
+                badge_text_en: profile.badge_text_en,
                 avatar_url: profile.avatar_url,
             })
             .eq("id", 1);
@@ -918,11 +1037,31 @@ export default function Dashboard() {
                                             />
                                         </Field>
                                     </div>
+                                    <Field label="Unvan (İngilizce)">
+                                        <input
+                                            type="text"
+                                            value={profile.title_en ?? ""}
+                                            onChange={(e) =>
+                                                setProfile({ ...profile, title_en: e.target.value })
+                                            }
+                                            className={inputCls}
+                                        />
+                                    </Field>
                                     <Field label="Kısa açıklama">
                                         <textarea
                                             value={profile.bio ?? ""}
                                             onChange={(e) =>
                                                 setProfile({ ...profile, bio: e.target.value })
+                                            }
+                                            rows={6}
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                    <Field label="Kısa açıklama (İngilizce)">
+                                        <textarea
+                                            value={profile.bio_en ?? ""}
+                                            onChange={(e) =>
+                                                setProfile({ ...profile, bio_en: e.target.value })
                                             }
                                             rows={6}
                                             className={inputCls}
@@ -934,6 +1073,16 @@ export default function Dashboard() {
                                             value={profile.badge_text ?? ""}
                                             onChange={(e) =>
                                                 setProfile({ ...profile, badge_text: e.target.value })
+                                            }
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                    <Field label="Rozet metni (İngilizce)">
+                                        <input
+                                            type="text"
+                                            value={profile.badge_text_en ?? ""}
+                                            onChange={(e) =>
+                                                setProfile({ ...profile, badge_text_en: e.target.value })
                                             }
                                             className={inputCls}
                                         />
@@ -1002,10 +1151,26 @@ export default function Dashboard() {
                                     required
                                 />
                             </Field>
+                            <Field label="Proje adı (İngilizce)">
+                                <input
+                                    type="text"
+                                    value={titleEn}
+                                    onChange={(e) => setTitleEn(e.target.value)}
+                                    className={inputCls}
+                                />
+                            </Field>
                             <Field label="Açıklama">
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
+                                    rows={3}
+                                    className={inputCls}
+                                />
+                            </Field>
+                            <Field label="Açıklama (İngilizce)">
+                                <textarea
+                                    value={descriptionEn}
+                                    onChange={(e) => setDescriptionEn(e.target.value)}
                                     rows={3}
                                     className={inputCls}
                                 />
@@ -1059,6 +1224,15 @@ export default function Dashboard() {
                                         className={inputCls}
                                     />
                                 </Field>
+                                <Field label="Terminal içeriği (İngilizce)">
+                                    <textarea
+                                        placeholder={"E.g.:\ncoin economy balanced\nmultiplayer quest system added"}
+                                        value={terminalLogEn}
+                                        onChange={(e) => setTerminalLogEn(e.target.value)}
+                                        rows={4}
+                                        className={inputCls}
+                                    />
+                                </Field>
                             </div>
 
                             <div className="border-t border-white/10 pt-6 space-y-6">
@@ -1078,6 +1252,14 @@ export default function Dashboard() {
                                     <textarea
                                         value={terminalSecondLog}
                                         onChange={(e) => setTerminalSecondLog(e.target.value)}
+                                        rows={4}
+                                        className={inputCls}
+                                    />
+                                </Field>
+                                <Field label="2. terminal içeriği (İngilizce)">
+                                    <textarea
+                                        value={terminalSecondLogEn}
+                                        onChange={(e) => setTerminalSecondLogEn(e.target.value)}
                                         rows={4}
                                         className={inputCls}
                                     />
@@ -1128,9 +1310,19 @@ export default function Dashboard() {
                                         <div className="flex items-start gap-4">
                                             <div>
                                                 <p className="font-semibold text-base">{project.title}</p>
+                                                {project.title_en && (
+                                                    <p className="text-sm text-purple-300/70 italic mt-0.5">
+                                                        {project.title_en}
+                                                    </p>
+                                                )}
                                                 <p className="text-sm text-zinc-400 mt-1 whitespace-pre-line">
                                                     {project.description}
                                                 </p>
+                                                {project.description_en && (
+                                                    <p className="text-sm text-zinc-500 italic mt-1 whitespace-pre-line">
+                                                        {project.description_en}
+                                                    </p>
+                                                )}
 
                                                 {project.tech_stack && (
                                                     <div className="flex flex-wrap gap-1.5 mt-3">
@@ -1209,6 +1401,11 @@ export default function Dashboard() {
                                                         <div className="whitespace-pre-line text-zinc-500 mt-1">
                                                             {project.terminal_log}
                                                         </div>
+                                                        {project.terminal_log_en && (
+                                                            <div className="whitespace-pre-line text-purple-300/60 italic mt-2">
+                                                                {project.terminal_log_en}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     {project.terminal_second_cmd && (
                                                         <div>
@@ -1217,6 +1414,11 @@ export default function Dashboard() {
                                                             <div className="whitespace-pre-line text-zinc-500 mt-1">
                                                                 {project.terminal_second_log}
                                                             </div>
+                                                            {project.terminal_second_log_en && (
+                                                                <div className="whitespace-pre-line text-purple-300/60 italic mt-2">
+                                                                    {project.terminal_second_log_en}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -1304,6 +1506,14 @@ export default function Dashboard() {
                                     className={inputCls}
                                 />
                             </Field>
+                            <Field label="Bölüm / Derece (İngilizce)">
+                                <input
+                                    type="text"
+                                    value={degreeEn}
+                                    onChange={(e) => setDegreeEn(e.target.value)}
+                                    className={inputCls}
+                                />
+                            </Field>
                             <div className="grid grid-cols-2 gap-6">
                                 <Field label="Başlangıç yılı">
                                     <input
@@ -1326,6 +1536,14 @@ export default function Dashboard() {
                                 <textarea
                                     value={eduDescription}
                                     onChange={(e) => setEduDescription(e.target.value)}
+                                    rows={3}
+                                    className={inputCls}
+                                />
+                            </Field>
+                            <Field label="Kısa açıklama (İngilizce, opsiyonel)">
+                                <textarea
+                                    value={eduDescriptionEn}
+                                    onChange={(e) => setEduDescriptionEn(e.target.value)}
                                     rows={3}
                                     className={inputCls}
                                 />
@@ -1359,6 +1577,11 @@ export default function Dashboard() {
                                                         {edu.degree}
                                                     </span>
                                                 )}
+                                                {edu.degree_en && (
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-purple-600/10 text-purple-300/70 border border-purple-500/20 italic">
+                                                        {edu.degree_en}
+                                                    </span>
+                                                )}
                                                 {edu.start_year && (
                                                     <span className="text-xs text-zinc-500">
                                                         {edu.start_year} - {edu.end_year || "devam ediyor"}
@@ -1368,6 +1591,11 @@ export default function Dashboard() {
                                             {edu.description && (
                                                 <p className="text-sm text-zinc-400 mt-3 whitespace-pre-line">
                                                     {edu.description}
+                                                </p>
+                                            )}
+                                            {edu.description_en && (
+                                                <p className="text-sm text-zinc-500 italic mt-1 whitespace-pre-line">
+                                                    {edu.description_en}
                                                 </p>
                                             )}
                                         </div>
@@ -1448,6 +1676,14 @@ export default function Dashboard() {
                                     className={inputCls}
                                 />
                             </Field>
+                            <Field label="Pozisyon (İngilizce)">
+                                <input
+                                    type="text"
+                                    value={positionEn}
+                                    onChange={(e) => setPositionEn(e.target.value)}
+                                    className={inputCls}
+                                />
+                            </Field>
                             <Field label="Çalışma türü">
                                 <select
                                     value={workType}
@@ -1458,6 +1694,18 @@ export default function Dashboard() {
                                     <option value="Ofis">Ofis</option>
                                     <option value="Uzaktan">Uzaktan</option>
                                     <option value="Hibrit">Hibrit</option>
+                                </select>
+                            </Field>
+                            <Field label="Çalışma türü (İngilizce)">
+                                <select
+                                    value={workTypeEn}
+                                    onChange={(e) => setWorkTypeEn(e.target.value)}
+                                    className={inputCls}
+                                >
+                                    <option value="">Select work type</option>
+                                    <option value="Office">Office</option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="Hybrid">Hybrid</option>
                                 </select>
                             </Field>
                             <div className="grid grid-cols-2 gap-6">
@@ -1482,6 +1730,14 @@ export default function Dashboard() {
                                 <textarea
                                     value={expDescription}
                                     onChange={(e) => setExpDescription(e.target.value)}
+                                    rows={3}
+                                    className={inputCls}
+                                />
+                            </Field>
+                            <Field label="Kısa açıklama (İngilizce, opsiyonel)">
+                                <textarea
+                                    value={expDescriptionEn}
+                                    onChange={(e) => setExpDescriptionEn(e.target.value)}
                                     rows={3}
                                     className={inputCls}
                                 />
@@ -1528,6 +1784,15 @@ export default function Dashboard() {
                                     className={inputCls}
                                 />
                             </Field>
+                            <Field label="Öne çıkan istatistik/başarı (İngilizce, opsiyonel)">
+                                <textarea
+                                    placeholder={"E.g.:\nTook an active role in a Flutter mobile app\nTook an active role in a React Native mobile app"}
+                                    value={expHighlightEn}
+                                    onChange={(e) => setExpHighlightEn(e.target.value)}
+                                    rows={3}
+                                    className={inputCls}
+                                />
+                            </Field>
 
                             <div className="flex gap-3 pt-2">
                                 <button type="submit" className={primaryBtnCls}>
@@ -1558,9 +1823,19 @@ export default function Dashboard() {
                                                         {exp.position}
                                                     </span>
                                                 )}
+                                                {exp.position_en && (
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-purple-600/10 text-purple-300/70 border border-purple-500/20 italic">
+                                                        {exp.position_en}
+                                                    </span>
+                                                )}
                                                 {exp.work_type && (
                                                     <span className="text-xs px-2 py-1 rounded-full bg-white/5 text-zinc-400 border border-white/10">
                                                         {exp.work_type}
+                                                    </span>
+                                                )}
+                                                {exp.work_type_en && (
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-white/[0.03] text-zinc-500 border border-white/5 italic">
+                                                        {exp.work_type_en}
                                                     </span>
                                                 )}
                                                 {exp.start_date && (
@@ -1572,6 +1847,11 @@ export default function Dashboard() {
                                             {exp.description && (
                                                 <p className="text-sm text-zinc-400 mt-3 whitespace-pre-line">
                                                     {exp.description}
+                                                </p>
+                                            )}
+                                            {exp.description_en && (
+                                                <p className="text-sm text-zinc-500 italic mt-1 whitespace-pre-line">
+                                                    {exp.description_en}
                                                 </p>
                                             )}
                                             {(() => {
@@ -1603,6 +1883,11 @@ export default function Dashboard() {
                                             {exp.highlight && (
                                                 <div className="flex items-center gap-2 mt-3 text-xs text-purple-300 bg-purple-600/10 border border-purple-500/25 rounded-lg px-3 py-2">
                                                     🚀 {exp.highlight}
+                                                </div>
+                                            )}
+                                            {exp.highlight_en && (
+                                                <div className="flex items-center gap-2 mt-2 text-xs text-purple-300/70 italic bg-purple-600/5 border border-purple-500/15 rounded-lg px-3 py-2">
+                                                    🚀 {exp.highlight_en}
                                                 </div>
                                             )}
                                         </div>
@@ -1729,11 +2014,31 @@ export default function Dashboard() {
                                         className={inputCls}
                                     />
                                 </Field>
+                                <Field label="Başlık (İngilizce)">
+                                    <input
+                                        type="text"
+                                        value={contactInfo.heading_en ?? ""}
+                                        onChange={(e) =>
+                                            setContactInfo({ ...contactInfo, heading_en: e.target.value })
+                                        }
+                                        className={inputCls}
+                                    />
+                                </Field>
                                 <Field label="Açıklama">
                                     <textarea
                                         value={contactInfo.description ?? ""}
                                         onChange={(e) =>
                                             setContactInfo({ ...contactInfo, description: e.target.value })
+                                        }
+                                        rows={3}
+                                        className={inputCls}
+                                    />
+                                </Field>
+                                <Field label="Açıklama (İngilizce)">
+                                    <textarea
+                                        value={contactInfo.description_en ?? ""}
+                                        onChange={(e) =>
+                                            setContactInfo({ ...contactInfo, description_en: e.target.value })
                                         }
                                         rows={3}
                                         className={inputCls}
@@ -1785,7 +2090,26 @@ export default function Dashboard() {
                                         <input
                                             type="file"
                                             accept="application/pdf"
-                                            onChange={handleCvUpload}
+                                            onChange={(e) => handleCvUpload(e, "cv_url")}
+                                            className="text-sm text-zinc-400"
+                                        />
+                                    </div>
+                                </Field>
+                                <Field label="CV (PDF, İngilizce)">
+                                    <div className="flex items-center gap-4">
+                                        {contactInfo.cv_url_en && (
+                                            <a
+                                                href={contactInfo.cv_url_en}
+                                                target="_blank"
+                                                className="text-xs text-purple-400 underline"
+                                            >
+                                                Mevcut İngilizce CV'yi görüntüle
+                                            </a>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="application/pdf"
+                                            onChange={(e) => handleCvUpload(e, "cv_url_en")}
                                             className="text-sm text-zinc-400"
                                         />
                                     </div>
@@ -1817,6 +2141,14 @@ export default function Dashboard() {
                                     required
                                 />
                             </Field>
+                            <Field label="Soru (İngilizce)">
+                                <input
+                                    type="text"
+                                    value={quizQuestionEn}
+                                    onChange={(e) => setQuizQuestionEn(e.target.value)}
+                                    className={inputCls}
+                                />
+                            </Field>
                             <div className="grid grid-cols-2 gap-6">
                                 <Field label="A şıkkı">
                                     <input
@@ -1825,6 +2157,14 @@ export default function Dashboard() {
                                         onChange={(e) => setQuizOptionA(e.target.value)}
                                         className={inputCls}
                                         required
+                                    />
+                                </Field>
+                                <Field label="A şıkkı (İngilizce)">
+                                    <input
+                                        type="text"
+                                        value={quizOptionAEn}
+                                        onChange={(e) => setQuizOptionAEn(e.target.value)}
+                                        className={inputCls}
                                     />
                                 </Field>
                                 <Field label="B şıkkı">
@@ -1836,6 +2176,14 @@ export default function Dashboard() {
                                         required
                                     />
                                 </Field>
+                                <Field label="B şıkkı (İngilizce)">
+                                    <input
+                                        type="text"
+                                        value={quizOptionBEn}
+                                        onChange={(e) => setQuizOptionBEn(e.target.value)}
+                                        className={inputCls}
+                                    />
+                                </Field>
                                 <Field label="C şıkkı">
                                     <input
                                         type="text"
@@ -1845,6 +2193,14 @@ export default function Dashboard() {
                                         required
                                     />
                                 </Field>
+                                <Field label="C şıkkı (İngilizce)">
+                                    <input
+                                        type="text"
+                                        value={quizOptionCEn}
+                                        onChange={(e) => setQuizOptionCEn(e.target.value)}
+                                        className={inputCls}
+                                    />
+                                </Field>
                                 <Field label="D şıkkı">
                                     <input
                                         type="text"
@@ -1852,6 +2208,14 @@ export default function Dashboard() {
                                         onChange={(e) => setQuizOptionD(e.target.value)}
                                         className={inputCls}
                                         required
+                                    />
+                                </Field>
+                                <Field label="D şıkkı (İngilizce)">
+                                    <input
+                                        type="text"
+                                        value={quizOptionDEn}
+                                        onChange={(e) => setQuizOptionDEn(e.target.value)}
+                                        className={inputCls}
                                     />
                                 </Field>
                             </div>
@@ -1894,20 +2258,43 @@ export default function Dashboard() {
                                     <div className="flex justify-between items-start gap-4">
                                         <div>
                                             <p className="font-semibold text-base">{q.question}</p>
+                                            {q.question_en && (
+                                                <p className="text-sm text-purple-300/70 italic mt-0.5">
+                                                    {q.question_en}
+                                                </p>
+                                            )}
                                             <div className="flex flex-wrap gap-2 mt-2">
                                                 {(["a", "b", "c", "d"] as const).map((opt) => (
                                                     <span
                                                         key={opt}
-                                                        className={`text-xs px-2 py-1 rounded-full border ${
-                                                            q.correct_option === opt
-                                                                ? "bg-green-600/15 text-green-300 border-green-500/30"
-                                                                : "bg-white/5 text-zinc-400 border-white/10"
-                                                        }`}
+                                                        className={`text-xs px-2 py-1 rounded-full border ${q.correct_option === opt
+                                                            ? "bg-green-600/15 text-green-300 border-green-500/30"
+                                                            : "bg-white/5 text-zinc-400 border-white/10"
+                                                            }`}
                                                     >
                                                         {opt.toUpperCase()}: {q[`option_${opt}`]}
                                                     </span>
                                                 ))}
                                             </div>
+                                            {(q.option_a_en || q.option_b_en || q.option_c_en || q.option_d_en) && (
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {(["a", "b", "c", "d"] as const).map((opt) => {
+                                                        const value = q[`option_${opt}_en`];
+                                                        if (!value) return null;
+                                                        return (
+                                                            <span
+                                                                key={opt}
+                                                                className={`text-xs px-2 py-1 rounded-full border italic ${q.correct_option === opt
+                                                                    ? "bg-green-600/10 text-green-300/70 border-green-500/20"
+                                                                    : "bg-white/[0.03] text-zinc-500 border-white/5"
+                                                                    }`}
+                                                            >
+                                                                {opt.toUpperCase()}: {value}
+                                                            </span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex gap-4 shrink-0">
                                             <button

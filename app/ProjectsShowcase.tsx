@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { localize } from "@/app/i18n";
 
 type Project = {
     id: string;
@@ -24,9 +25,13 @@ type ProjectPhoto = {
 
 type Segment = { text: string; cls: string };
 
-function buildSegments(project: Project, os: "mac" | "win"): Segment[] {
+function buildSegments(project: Project, os: "mac" | "win", locale: string): Segment[] {
     const prompt = os === "win" ? "PS C:\\Projects> " : "$ ";
     const ext = os === "win" ? "config" : "log";
+    const title = localize(project, "title", locale) || project.title;
+    const description = localize(project, "description", locale);
+    const terminalLog = localize(project, "terminal_log", locale);
+    const terminalSecondLog = localize(project, "terminal_second_log", locale);
     const fileName =
         project.title
             .toLowerCase()
@@ -35,9 +40,9 @@ function buildSegments(project: Project, os: "mac" | "win"): Segment[] {
     const catCmd = os === "win" ? `Get-Content ${fileName}` : `cat ${fileName}`;
 
     const bullets =
-        (project.terminal_log?.trim()
-            ? project.terminal_log.split("\n")
-            : project.description?.split(/[•\n]/) ?? []
+        (terminalLog?.trim()
+            ? terminalLog.split("\n")
+            : description?.split(/[•\n]/) ?? []
         )
             .map((d) => d.trim())
             .filter((d) => d.length > 0)
@@ -49,12 +54,16 @@ function buildSegments(project: Project, os: "mac" | "win"): Segment[] {
             .filter((t) => t.length > 0) ?? [];
 
     const buildCmd = project.terminal_build_cmd?.trim() || "npm run build";
+    const projectLabel = locale === "en" ? "> project: " : "> proje: ";
+    const techLabel = locale === "en" ? "> technologies: " : "> teknolojiler: ";
+    const statusLabel = locale === "en" ? "> status: " : "> durum: ";
+    const doneLabel = locale === "en" ? "completed ✓" : "tamamlandı ✓";
 
     const seg: Segment[] = [];
     seg.push({ text: prompt, cls: "text-emerald-400 font-bold" });
     seg.push({ text: `${buildCmd}\n`, cls: "" });
 
-    const commitLines = bullets.length > 0 ? bullets : [project.title];
+    const commitLines = bullets.length > 0 ? bullets : [title];
     commitLines.forEach((line) => {
         seg.push({ text: line + "\n", cls: "" });
     });
@@ -66,7 +75,7 @@ function buildSegments(project: Project, os: "mac" | "win"): Segment[] {
         seg.push({ text: project.terminal_second_cmd.trim() + "\n", cls: "" });
 
         const secondLines =
-            project.terminal_second_log
+            terminalSecondLog
                 ?.split("\n")
                 .map((l) => l.trim())
                 .filter((l) => l.length > 0) ?? [];
@@ -79,14 +88,14 @@ function buildSegments(project: Project, os: "mac" | "win"): Segment[] {
     seg.push({ text: "\n", cls: "" });
     seg.push({ text: prompt, cls: "text-emerald-400 font-bold" });
     seg.push({ text: catCmd + "\n", cls: "" });
-    seg.push({ text: "> proje: ", cls: "text-zinc-500" });
-    seg.push({ text: project.title + "\n", cls: "text-violet-300" });
+    seg.push({ text: projectLabel, cls: "text-zinc-500" });
+    seg.push({ text: title + "\n", cls: "text-violet-300" });
     if (tags.length > 0) {
-        seg.push({ text: "> teknolojiler: ", cls: "text-zinc-500" });
+        seg.push({ text: techLabel, cls: "text-zinc-500" });
         seg.push({ text: tags.join(", ") + "\n", cls: "text-violet-300" });
     }
-    seg.push({ text: "> durum: ", cls: "text-zinc-500" });
-    seg.push({ text: "tamamlandı ✓", cls: "text-emerald-400 font-bold" });
+    seg.push({ text: statusLabel, cls: "text-zinc-500" });
+    seg.push({ text: doneLabel, cls: "text-emerald-400 font-bold" });
 
     return seg;
 }
@@ -111,7 +120,7 @@ function progressBar(step: number) {
     return { filled, empty, pct };
 }
 
-function Terminal({ project, title }: { project: Project; title: string }) {
+function Terminal({ project, title, locale }: { project: Project; title: string; locale: string }) {
     const [os, setOs] = useState<"mac" | "win">("mac");
     const [phase, setPhase] = useState<"spinner" | "progress" | "typing" | "done">(
         "spinner"
@@ -120,7 +129,7 @@ function Terminal({ project, title }: { project: Project; title: string }) {
     const [progressStep, setProgressStep] = useState(0);
     const [revealed, setRevealed] = useState(0);
 
-    const segments = buildSegments(project, os);
+    const segments = buildSegments(project, os, locale);
     const flatChars: { ch: string; segIdx: number }[] = [];
     segments.forEach((seg, si) => {
         for (const ch of seg.text) flatChars.push({ ch, segIdx: si });
@@ -167,7 +176,7 @@ function Terminal({ project, title }: { project: Project; title: string }) {
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [project.id, os]);
+    }, [project.id, os, locale]);
 
     const fileName =
         project.title.toLowerCase().replace(/[^a-z0-9ığüşöç]+/gi, "_").slice(0, 24) +
@@ -239,7 +248,7 @@ function Terminal({ project, title }: { project: Project; title: string }) {
                             <span className="text-yellow-400">
                                 {SPINNER_FRAMES[spinnerIdx % SPINNER_FRAMES.length]}
                             </span>{" "}
-                            derleniyor...
+                            {locale === "en" ? "building..." : "derleniyor..."}
                         </>
                     )}
 
@@ -273,7 +282,7 @@ function Terminal({ project, title }: { project: Project; title: string }) {
                             <span className="text-yellow-400 font-bold">100%</span>
                             {"\n"}
                             <span className="text-emerald-400 font-bold">
-                                ✓ derleme başarılı
+                                ✓ {locale === "en" ? "build successful" : "derleme başarılı"}
                             </span>
                             {"\n\n"}
                             {segments.map((seg, i) => {
@@ -300,9 +309,11 @@ function Terminal({ project, title }: { project: Project; title: string }) {
 export default function ProjectsShowcase({
     projects,
     projectPhotos,
+    locale,
 }: {
     projects: Project[];
     projectPhotos: ProjectPhoto[];
+    locale: string;
 }) {
     const [selectedId, setSelectedId] = useState(projects[0]?.id);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -334,7 +345,7 @@ export default function ProjectsShowcase({
                             {project.image_url ? (
                                 <img
                                     src={project.image_url}
-                                    alt={project.title}
+                                    alt={localize(project, "title", locale) || project.title}
                                     className="w-24 h-24 object-cover rounded-xl shrink-0"
                                 />
                             ) : (
@@ -342,7 +353,7 @@ export default function ProjectsShowcase({
                             )}
                             <div>
                                 <div className="text-white font-semibold text-lg mb-1.5">
-                                    {project.title}
+                                    {localize(project, "title", locale) || project.title}
                                 </div>
                                 {project.tech_stack && (
                                     <div className="flex flex-wrap gap-1.5 mt-1">
@@ -363,8 +374,8 @@ export default function ProjectsShowcase({
                                 )}
                                 {project.description && (
                                     <p className="text-sm text-white/55 mt-2 line-clamp-2 max-w-[280px]">
-                                        {project.description
-                                            .split(/[•\n]/)
+                                        {localize(project, "description", locale)
+                                            ?.split(/[•\n]/)
                                             .map((d) => d.trim())
                                             .filter((d) => d.length > 0)[0]
                                             ?.replace(/^[^\p{L}\p{N}]+/u, "")}
@@ -393,7 +404,7 @@ export default function ProjectsShowcase({
             {/* DETAY */}
             <div className="flex-1 w-full rounded-[20px] border border-white/10 bg-gradient-to-br from-[#15111f] to-[#0d0a15] overflow-hidden min-h-[480px]">
                 <div key={selected.id} className="animate-fade-in-up p-6">
-                    <Terminal project={selected} title={selected.title} />
+                    <Terminal project={selected} title={localize(selected, "title", locale) || selected.title} locale={locale} />
 
                     {photos.length > 0 && (
                         <div
@@ -416,7 +427,7 @@ export default function ProjectsShowcase({
 
                     {selected.description && (
                         <p className="text-white/70 text-[15px] leading-relaxed mb-4">
-                            {selected.description}
+                            {localize(selected, "description", locale)}
                         </p>
                     )}
                     {tags.length > 0 && (
@@ -439,7 +450,7 @@ export default function ProjectsShowcase({
                                 rel="noopener noreferrer"
                                 className="text-sm bg-white text-black font-semibold rounded-full px-5 py-2 hover:bg-gray-200 transition-colors"
                             >
-                                Canlı Gör
+                                {locale === "en" ? "Live Demo" : "Canlı Gör"}
                             </a>
                         )}
                         {selected.github_url && (
@@ -484,7 +495,7 @@ export default function ProjectsShowcase({
 
                     <img
                         src={photos[lightboxIndex].image_url}
-                        alt={selected.title}
+                        alt={localize(selected, "title", locale) || selected.title}
                         onClick={(e) => e.stopPropagation()}
                         className="max-w-[90vw] max-h-[85vh] object-contain rounded-xl border border-white/10"
                     />
