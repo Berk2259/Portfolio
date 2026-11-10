@@ -112,6 +112,33 @@ type ProjectPhoto = {
     image_url: string;
 };
 
+type Achievement = {
+    id: string;
+    title: string;
+    title_en: string | null;
+    subtitle: string | null;
+    subtitle_en: string | null;
+    description: string | null;
+    description_en: string | null;
+    year: string | null;
+    tags: string | null;
+    tags_en: string | null;
+    color: string | null;
+    role?: string | null;
+    role_en?: string | null;
+    highlights?: string | null;
+    highlights_en?: string | null;
+    sort_order?: number | null;
+    category?: string | null;
+    category_en?: string | null;
+};
+
+type AchievementPhoto = {
+    id: string;
+    achievement_id: string;
+    image_url: string;
+};
+
 const TABS = [
     { key: "profile", label: "Profil", icon: "👤" },
     { key: "projects", label: "Projeler", icon: "💼" },
@@ -120,6 +147,7 @@ const TABS = [
     { key: "experience", label: "Deneyim", icon: "🏢" },
     { key: "skills", label: "Yetenekler", icon: "⚙️" },
     { key: "contact", label: "İletişim", icon: "✉️" },
+    { key: "achievements", label: "Etkinlikler", icon: "🏆" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -229,6 +257,26 @@ export default function Dashboard() {
     const [terminalSecondCmd, setTerminalSecondCmd] = useState("");
     const [terminalSecondLog, setTerminalSecondLog] = useState("");
     const [terminalSecondLogEn, setTerminalSecondLogEn] = useState("");
+    const [achievements, setAchievements] = useState<Achievement[]>([]);
+    const [achievementPhotos, setAchievementPhotos] = useState<AchievementPhoto[]>([]);
+    const [achTitle, setAchTitle] = useState("");
+    const [achTitleEn, setAchTitleEn] = useState("");
+    const [achSubtitle, setAchSubtitle] = useState("");
+    const [achSubtitleEn, setAchSubtitleEn] = useState("");
+    const [achDescription, setAchDescription] = useState("");
+    const [achDescriptionEn, setAchDescriptionEn] = useState("");
+    const [achYear, setAchYear] = useState("");
+    const [achTags, setAchTags] = useState("");
+    const [achTagsEn, setAchTagsEn] = useState("");
+    const [achColor, setAchColor] = useState("orange");
+    const [achSortOrder, setAchSortOrder] = useState("0");
+    const [achCategory, setAchCategory] = useState("");
+    const [achCategoryEn, setAchCategoryEn] = useState("");
+    const [editingAchievementId, setEditingAchievementId] = useState<string | null>(null);
+    const [achRole, setAchRole] = useState("");
+    const [achRoleEn, setAchRoleEn] = useState("");
+    const [achHighlights, setAchHighlights] = useState("");
+    const [achHighlightsEn, setAchHighlightsEn] = useState("");
     const router = useRouter();
 
     useEffect(() => {
@@ -248,6 +296,8 @@ export default function Dashboard() {
                 loadProjectPhotos();
                 loadContactInfo();
                 loadQuizQuestions();
+                loadAchievements();
+                loadAchievementPhotos();
             }
             setLoading(false);
         });
@@ -819,6 +869,141 @@ export default function Dashboard() {
     async function handleDeleteProjectPhoto(id: string) {
         await supabase.from("project_photos").delete().eq("id", id);
         loadProjectPhotos();
+    }
+
+    async function loadAchievements() {
+        const { data } = await supabase
+            .from("achievements")
+            .select("*")
+            .order("sort_order", { ascending: true });
+        setAchievements(data ?? []);
+    }
+
+    async function loadAchievementPhotos() {
+        const { data } = await supabase
+            .from("achievement_photos")
+            .select("*")
+            .order("created_at", { ascending: true });
+        setAchievementPhotos(data ?? []);
+    }
+
+    function resetAchievementForm() {
+        setAchTitle("");
+        setAchTitleEn("");
+        setAchSubtitle("");
+        setAchSubtitleEn("");
+        setAchDescription("");
+        setAchDescriptionEn("");
+        setAchRole("");
+        setAchRoleEn("");
+        setAchHighlights("");
+        setAchHighlightsEn("");
+        setAchYear("");
+        setAchTags("");
+        setAchTagsEn("");
+        setAchColor("purple");
+        setAchSortOrder("0");
+        setAchCategory("");
+        setAchCategoryEn("");
+    }
+
+    async function handleAddAchievement(e: React.FormEvent) {
+        e.preventDefault();
+
+        const payload = {
+            title: achTitle,
+            title_en: achTitleEn || null,
+            subtitle: achSubtitle || null,
+            subtitle_en: achSubtitleEn || null,
+            description: achDescription || null,
+            description_en: achDescriptionEn || null,
+            role: achRole || null,
+            role_en: achRoleEn || null,
+            highlights: achHighlights || null,
+            highlights_en: achHighlightsEn || null,
+            year: achYear || null,
+            tags: achTags || null,
+            tags_en: achTagsEn || null,
+            color: achColor || "purple",
+            sort_order: achSortOrder ? parseInt(achSortOrder, 10) : 0,
+            category: achCategory || null,
+            category_en: achCategoryEn || null,
+        };
+        if (editingAchievementId) {
+            await supabase
+                .from("achievements")
+                .update(payload)
+                .eq("id", editingAchievementId);
+            setEditingAchievementId(null);
+        } else {
+            await supabase.from("achievements").insert(payload);
+        }
+
+        resetAchievementForm();
+        loadAchievements();
+    }
+
+    function handleEditAchievement(achievement: Achievement) {
+        setEditingAchievementId(achievement.id);
+        setAchTitle(achievement.title);
+        setAchTitleEn(achievement.title_en ?? "");
+        setAchSubtitle(achievement.subtitle ?? "");
+        setAchSubtitleEn(achievement.subtitle_en ?? "");
+        setAchDescription(achievement.description ?? "");
+        setAchDescriptionEn(achievement.description_en ?? "");
+        setAchRole(achievement.role ?? "");
+        setAchRoleEn(achievement.role_en ?? "");
+        setAchHighlights(achievement.highlights ?? "");
+        setAchHighlightsEn(achievement.highlights_en ?? "");
+        setAchYear(achievement.year ?? "");
+        setAchTags(achievement.tags ?? "");
+        setAchTagsEn(achievement.tags_en ?? "");
+        setAchColor(achievement.color ?? "purple");
+        setAchSortOrder(String(achievement.sort_order ?? 0));
+        setAchCategory(achievement.category ?? "");
+        setAchCategoryEn(achievement.category_en ?? "");
+    }
+
+    function handleCancelEditAchievement() {
+        setEditingAchievementId(null);
+        resetAchievementForm();
+    }
+
+    async function handleDeleteAchievement(id: string) {
+        await supabase.from("achievements").delete().eq("id", id);
+        loadAchievements();
+    }
+
+    async function handleUploadAchievementPhoto(
+        achievementId: string,
+        e: React.ChangeEvent<HTMLInputElement>
+    ) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const filePath = `achievement-photo-${Date.now()}-${file.name}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert("Yükleme başarısız: " + uploadError.message);
+            return;
+        }
+
+        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+        await supabase
+            .from("achievement_photos")
+            .insert({ achievement_id: achievementId, image_url: data.publicUrl });
+
+        loadAchievementPhotos();
+    }
+
+    async function handleDeleteAchievementPhoto(id: string) {
+        await supabase.from("achievement_photos").delete().eq("id", id);
+        loadAchievementPhotos();
     }
 
     async function handleUploadExperiencePhoto(
@@ -2314,6 +2499,321 @@ export default function Dashboard() {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+                )}
+
+                {/* ETKİNLİKLER & BAŞARILAR */}
+                {activeTab === "achievements" && (
+                    <div className="space-y-6">
+                        <h2 className="text-xl font-semibold">Etkinlikler &amp; Başarılar</h2>
+
+                        <form onSubmit={handleAddAchievement} className={`${cardCls} space-y-6`}>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Field label="Başlık (TR)">
+                                    <input className={inputCls} value={achTitle} onChange={(e) => setAchTitle(e.target.value)} required />
+                                </Field>
+                                <Field label="Başlık (EN)">
+                                    <input className={inputCls} value={achTitleEn} onChange={(e) => setAchTitleEn(e.target.value)} />
+                                </Field>
+                                <Field label="Alt başlık (TR)">
+                                    <input className={inputCls} value={achSubtitle} onChange={(e) => setAchSubtitle(e.target.value)} />
+                                </Field>
+                                <Field label="Alt başlık (EN)">
+                                    <input className={inputCls} value={achSubtitleEn} onChange={(e) => setAchSubtitleEn(e.target.value)} />
+                                </Field>
+                            </div>
+
+                            <Field label="Açıklama (TR)">
+                                <textarea className={inputCls} rows={3} value={achDescription} onChange={(e) => setAchDescription(e.target.value)} />
+                            </Field>
+                            <Field label="Açıklama (EN)">
+                                <textarea className={inputCls} rows={3} value={achDescriptionEn} onChange={(e) => setAchDescriptionEn(e.target.value)} />
+                            </Field>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Field label="Üstlendiğim Rol (TR) — Kartın Arkasında Görünür">
+                                    <input
+                                        className={inputCls}
+                                        placeholder="Örn: Takım Kaptanı & Flutter Mimarisi"
+                                        value={achRole}
+                                        onChange={(e) => setAchRole(e.target.value)}
+                                    />
+                                </Field>
+                                <Field label="Üstlendiğim Rol (EN)">
+                                    <input
+                                        className={inputCls}
+                                        placeholder="e.g. Team Lead & Flutter Architect"
+                                        value={achRoleEn}
+                                        onChange={(e) => setAchRoleEn(e.target.value)}
+                                    />
+                                </Field>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Field label="Öne Çıkan Kazanımlar (TR) — Her satıra bir madde yazın">
+                                    <textarea
+                                        className={inputCls}
+                                        rows={3}
+                                        placeholder="48 saatte MVP teslimi yapıldı&#10;15+ ekip arasından 1.lik kazanıldı"
+                                        value={achHighlights}
+                                        onChange={(e) => setAchHighlights(e.target.value)}
+                                    />
+                                </Field>
+                                <Field label="Öne Çıkan Kazanımlar (EN)">
+                                    <textarea
+                                        className={inputCls}
+                                        rows={3}
+                                        placeholder="Delivered MVP in 48 hours&#10;Won 1st place among 15+ teams"
+                                        value={achHighlightsEn}
+                                        onChange={(e) => setAchHighlightsEn(e.target.value)}
+                                    />
+                                </Field>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                                <Field label="Yıl">
+                                    <input className={inputCls} value={achYear} onChange={(e) => setAchYear(e.target.value)} />
+                                </Field>
+                                <Field label="Sıra (küçük sayı önce gösterilir)">
+                                    <input
+                                        type="number"
+                                        className={inputCls}
+                                        value={achSortOrder}
+                                        onChange={(e) => setAchSortOrder(e.target.value)}
+                                    />
+                                </Field>
+                                <Field label="Etiketler (virgülle, TR)">
+                                    <input className={inputCls} value={achTags} onChange={(e) => setAchTags(e.target.value)} />
+                                </Field>
+                                <Field label="Etiketler (virgülle, EN)">
+                                    <input className={inputCls} value={achTagsEn} onChange={(e) => setAchTagsEn(e.target.value)} />
+                                </Field>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Field label="Rozet Yazısı (TR) — örn. Hackathon">
+                                    <input className={inputCls} value={achCategory} onChange={(e) => setAchCategory(e.target.value)} />
+                                </Field>
+                                <Field label="Rozet Yazısı (EN)">
+                                    <input className={inputCls} value={achCategoryEn} onChange={(e) => setAchCategoryEn(e.target.value)} />
+                                </Field>
+                            </div>
+
+                            <Field label="Renk">
+                                <div className="flex gap-3">
+                                    {["orange", "green", "blue", "purple"].map((c) => (
+                                        <button
+                                            key={c}
+                                            type="button"
+                                            onClick={() => setAchColor(c)}
+                                            className={`w-8 h-8 rounded-full border-2 ${achColor === c ? "border-white" : "border-transparent"}`}
+                                            style={{
+                                                background:
+                                                    c === "orange" ? "#f97316" :
+                                                        c === "green" ? "#10b981" :
+                                                            c === "blue" ? "#6366f1" : "#c026d3",
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </Field>
+
+                            <div className="flex gap-3">
+                                <button type="submit" className={primaryBtnCls}>
+                                    {editingAchievementId ? "Güncelle" : "Ekle"}
+                                </button>
+                                {editingAchievementId && (
+                                    <button type="button" onClick={handleCancelEditAchievement} className={secondaryBtnCls}>
+                                        Vazgeç
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                                Ekli Etkinlikler &amp; Başarılar ({achievements.length})
+                            </h3>
+
+                            {achievements.map((a) => {
+                                const photos = achievementPhotos.filter((p) => p.achievement_id === a.id);
+                                const tagsList = a.tags ? a.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+                                const highlightsList = (a as any).highlights
+                                    ? (a as any).highlights.split("\n").filter((h: string) => h.trim().length > 0)
+                                    : [];
+
+                                return (
+                                    <div key={a.id} className={`${cardCls} space-y-4 border border-white/10 hover:border-purple-500/30 transition-all`}>
+
+                                        {/* ÜST BAR: KATEGORİ, YIL VE AKSİYON BUTONLARI */}
+                                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1.5 bg-purple-950/60 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-bold text-purple-300">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                                                    <span>Rozet: {a.category || "Etkinlik"} • Renk: {a.color ? a.color.toUpperCase() : "—"}</span>
+                                                </div>
+                                                <div className="text-xs text-indigo-300 bg-indigo-950/60 border border-indigo-400/30 px-2.5 py-0.5 rounded-full font-medium">
+                                                    📅 Yıl: {a.year || "Belirtilmedi"}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleEditAchievement(a)}
+                                                    className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 hover:text-white text-purple-300 text-xs font-bold transition-all border border-purple-500/30 flex items-center gap-1.5 shadow-sm"
+                                                >
+                                                    ✏️ Düzenle
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteAchievement(a.id)}
+                                                    className="px-3.5 py-1.5 rounded-xl bg-red-600/20 hover:bg-red-600 hover:text-white text-red-400 text-xs font-bold transition-all border border-red-500/30 flex items-center gap-1.5 shadow-sm"
+                                                >
+                                                    🗑️ Sil
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* BAŞLIK VE ALT BAŞLIK (NET BAŞLIKLARLA) */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-black/30 border border-white/5">
+                                            <div>
+                                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
+                                                    📌 Başlık (TR &amp; EN):
+                                                </span>
+                                                <p className="text-base font-bold text-white">{a.title}</p>
+                                                {a.title_en && (
+                                                    <p className="text-xs text-purple-300/70 italic mt-0.5">{a.title_en}</p>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
+                                                    ⚡ Alt Başlık:
+                                                </span>
+                                                <p className="text-xs font-semibold text-purple-400">{a.subtitle || "—"}</p>
+                                                {a.subtitle_en && (
+                                                    <p className="text-xs text-zinc-500 italic mt-0.5">{a.subtitle_en}</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* AÇIKLAMA KUTUSU */}
+                                        <div className="p-4 rounded-xl bg-black/30 border border-white/5">
+                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
+                                                📝 Açıklama:
+                                            </span>
+                                            <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-line">
+                                                {a.description || "Açıklama girilmedi."}
+                                            </p>
+                                            {a.description_en && (
+                                                <p className="text-xs text-zinc-500 italic mt-1.5 border-t border-white/5 pt-1.5">
+                                                    {a.description_en}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* İKİ SÜTUN: ROL & ÖNE ÇIKAN KAZANIMLAR */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                            {/* Üstlenilen Rol */}
+                                            <div className="p-4 rounded-xl bg-black/30 border border-purple-500/20 flex flex-col justify-between">
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider block mb-1">
+                                                        👤 Kartın Arkasındaki Rol:
+                                                    </span>
+                                                    <p className="text-sm font-bold text-white">
+                                                        {(a as any).role || "—"}
+                                                    </p>
+                                                    {(a as any).role_en && (
+                                                        <p className="text-xs text-zinc-500 italic mt-0.5">{(a as any).role_en}</p>
+                                                    )}
+                                                </div>
+                                                <span className="text-[10px] text-zinc-500 mt-2 block font-mono">3D Flip ile görünür</span>
+                                            </div>
+
+                                            {/* Kazanım Maddeleri */}
+                                            <div className="p-4 rounded-xl bg-black/30 border border-purple-500/20">
+                                                <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider block mb-1.5">
+                                                    🎯 Öne Çıkan Kazanımlar ({highlightsList.length} Madde):
+                                                </span>
+                                                {highlightsList.length > 0 ? (
+                                                    <div className="space-y-1.5 text-xs text-zinc-300">
+                                                        {highlightsList.map((h: string, idx: number) => (
+                                                            <div key={idx} className="flex items-start gap-2">
+                                                                <span className="text-purple-400 font-bold shrink-0">{idx + 1}.</span>
+                                                                <span>{h}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-zinc-500 italic">Kazanım maddesi eklenmedi.</p>
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                        {/* ETİKETLER */}
+                                        <div className="p-3 rounded-xl bg-black/30 border border-white/5 flex flex-wrap items-center gap-2">
+                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                                                🏷️ Etiketler:
+                                            </span>
+                                            {tagsList.length > 0 ? (
+                                                tagsList.map((tag: string) => (
+                                                    <span key={tag} className="text-xs px-2.5 py-0.5 rounded-md bg-purple-950/40 text-purple-300 border border-purple-500/20">
+                                                        #{tag}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="text-xs text-zinc-500 italic">Etiket yok.</span>
+                                            )}
+                                        </div>
+
+                                        {/* FOTOĞRAF GALERİSİ YÖNETİMİ */}
+                                        <div className="p-4 rounded-xl bg-black/30 border border-white/5 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                                                    📸 Fotoğraf Galerisi ({photos.length} Fotoğraf):
+                                                </span>
+                                                <span className="text-[10px] text-zinc-500">İlk fotoğraf kapak görseli olur</span>
+                                            </div>
+
+                                            <div className="flex gap-3 flex-wrap items-center">
+                                                {photos.map((p, pIndex) => (
+                                                    <div key={p.id} className="relative group/photo">
+                                                        <img
+                                                            src={p.image_url}
+                                                            alt=""
+                                                            className="w-24 h-20 rounded-xl object-cover border border-white/10 group-hover/photo:border-purple-400 transition-all shadow-md"
+                                                        />
+                                                        {pIndex === 0 && (
+                                                            <span className="absolute bottom-1 left-1 bg-black/85 text-[9px] font-bold text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">
+                                                                ⭐ Kapak
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleDeleteAchievementPhoto(p.id)}
+                                                            className="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-500 rounded-full w-5 h-5 text-xs text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+                                                            title="Fotoğrafı Sil"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ))}
+
+                                                {/* Yeni Fotoğraf Yükle Butonu */}
+                                                <label className="h-20 px-5 rounded-xl border-2 border-dashed border-purple-500/40 hover:border-purple-400 hover:bg-purple-950/30 text-xs font-bold text-purple-300 flex flex-col items-center justify-center gap-1 cursor-pointer transition-all">
+                                                    <span className="text-base">📤</span>
+                                                    <span>+ Fotoğraf Yükle</span>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={(e) => handleUploadAchievementPhoto(a.id, e)}
+                                                    />
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </main>

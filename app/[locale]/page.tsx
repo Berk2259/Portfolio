@@ -5,6 +5,7 @@ import TechFloat from "@/app/TechFloat";
 import ProjectsShowcase from "@/app/ProjectsShowcase";
 import ExperienceTimeline from "@/app/ExperienceTimeline";
 import ContactSection from "@/app/ContactSection";
+import AchievementsSection from "@/app/AchievementsSection";
 import LanguageSwitcher from "@/app/LanguageSwitcher";
 import { getDictionary, localize } from "@/app/i18n";
 
@@ -28,6 +29,8 @@ export default async function Home({
         { data: quizQuestions },
         { data: skills },
         { data: projectPhotos },
+        { data: achievements },
+        { data: achievementPhotos },
     ] = await Promise.all([
         supabase.from("projects").select("*"),
         supabase.from("profile").select("*").single(),
@@ -58,6 +61,11 @@ export default async function Home({
             .from("project_photos")
             .select("*")
             .order("created_at", { ascending: true }),
+        supabase
+            .from("achievements")
+            .select("*")
+            .order("sort_order", { ascending: true }),
+        supabase.from("achievement_photos").select("*"),
     ]);
 
     return (
@@ -213,6 +221,14 @@ export default async function Home({
                     <ProjectsShowcase
                         projects={projects ?? []}
                         projectPhotos={projectPhotos ?? []}
+                        locale={locale}
+                    />
+                </section>
+
+                <section id="etkinlikler">
+                    <AchievementsSection
+                        achievements={achievements ?? []}
+                        achievementPhotos={achievementPhotos ?? []}
                         locale={locale}
                     />
                 </section>
