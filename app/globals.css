@@ -472,6 +472,7 @@ body {
 .card-scene:not(.is-flipped):hover .holo-sheen {
   opacity: 0.8;
 }
+
 /* =======================================================
    ETKİNLİKLER: 1 + 3 BİRLEŞİMİ (SOFT AMBIENT & FROSTED GLASS)
    ======================================================= */
@@ -559,4 +560,14 @@ body {
 
 .card-scene:not(.is-flipped):hover .glass-frosted-sheen {
   opacity: 1;
+}
+
+@keyframes ken-burns-slow {
+  0% { transform: scale(1.5) translate(0%, 0%); }
+  50% { transform: scale(1.8) translate(-3%, 3%); }
+  100% { transform: scale(1.5) translate(0%, 0%); }
+}
+
+.ken-burns {
+  animation: ken-burns-slow 8s ease-in-out infinite;
 }

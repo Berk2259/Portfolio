@@ -25,6 +25,7 @@ export type AchievementPhoto = {
     id: string;
     achievement_id: string;
     image_url: string;
+    zoom?: number | null;
 };
 
 const ACH_COLORS: Record<string, string> = {
@@ -32,6 +33,10 @@ const ACH_COLORS: Record<string, string> = {
     green: "#10b981",
     blue: "#6366f1",
     purple: "#c026d3",
+    red: "#ef4444",
+    pink: "#ec4899",
+    yellow: "#eab308",
+    teal: "#14b8a6",
 };
 
 export default function AchievementsSection({
@@ -122,15 +127,17 @@ export default function AchievementsSection({
         <div className="space-y-10 relative">
 
             {/* BÖLÜM BAŞLIĞI */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-white/5">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-950/60 border border-purple-500/30 text-xs font-semibold text-purple-200 mb-3 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
-                        <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                        <span>{locale === "en" ? "COMMUNITY & ACHIEVEMENTS" : "ETKİNLİK ARŞİVİ & TOPLULUK"}</span>
-                    </div>
                     <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
                         {locale === "en" ? "Events &" : "Etkinlikler &"}{" "}
-                        <span className="bg-gradient-to-r from-purple-400 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent">
+                        <span
+                            className="bg-clip-text text-transparent"
+                            style={{
+                                backgroundImage:
+                                    "linear-gradient(90deg, #3b82f6, #6366f1, #818cf8)",
+                            }}
+                        >
                             {locale === "en" ? "Achievements" : "Başarılar"}
                         </span>
                     </h2>
@@ -167,11 +174,38 @@ export default function AchievementsSection({
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                         <div className="lg:col-span-8 space-y-3">
-                            <div className="w-full h-96 md:h-[34rem] rounded-2xl overflow-hidden bg-black/80 border border-white/10 relative">
+                            <div className="w-full h-96 md:h-[34rem] rounded-2xl overflow-hidden bg-black border border-white/10 relative">
+                                <img
+                                    src={selectedPhotoUrl || activePhotos[0]?.image_url}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="absolute inset-0 w-full h-full object-cover scale-125 blur-lg saturate-100 opacity-90"
+                                />
+                                <div
+                                    className="absolute inset-0"
+                                    style={{
+                                        background:
+                                            "linear-gradient(160deg, rgba(96,165,250,0.12), rgba(129,140,248,0.06))",
+                                    }}
+                                />
+                                <div
+                                    className="absolute inset-0"
+                                    style={{
+                                        background:
+                                            "radial-gradient(ellipse at center, transparent 55%, rgba(15,23,42,0.3) 100%)",
+                                    }}
+                                />
                                 <img
                                     src={selectedPhotoUrl || activePhotos[0]?.image_url}
                                     alt="Etkinlik Sahnesi"
-                                    className="w-full h-full object-cover transition-all duration-300"
+                                    className="relative w-full h-full object-contain transition-all duration-300 drop-shadow-2xl"
+                                    style={{
+                                        transform: `scale(${
+                                            (activePhotos.find(
+                                                (p) => p.image_url === (selectedPhotoUrl || activePhotos[0]?.image_url)
+                                            )?.zoom ?? 150) / 100
+                                        })`,
+                                    }}
                                 />
                             </div>
 
@@ -280,7 +314,10 @@ export default function AchievementsSection({
 
                                                 {/* Yıl Rozeti */}
                                                 {ach.year && (
-                                                    <span className="absolute top-3.5 right-3.5 text-xs text-indigo-300 border border-indigo-400/30 bg-black/60 px-2.5 py-0.5 rounded-full shadow-lg">
+                                                    <span
+                                                        className="absolute top-3.5 right-3.5 text-xs border bg-black/60 px-2.5 py-0.5 rounded-full shadow-lg"
+                                                        style={{ color: accent, borderColor: `${accent}4d` }}
+                                                    >
                                                         {ach.year}
                                                     </span>
                                                 )}
@@ -297,8 +334,11 @@ export default function AchievementsSection({
                                                     {title}
                                                 </h3>
                                                 {subtitle && (
-                                                    <p className="text-xs font-medium" style={{ color: accent }}>
-                                                        ⚡ {subtitle}
+                                                    <p className="text-xs font-medium flex items-center gap-1" style={{ color: accent }}>
+                                                        <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z" />
+                                                        </svg>
+                                                        {subtitle}
                                                     </p>
                                                 )}
                                                 {description && (

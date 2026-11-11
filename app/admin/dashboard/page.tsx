@@ -137,6 +137,7 @@ type AchievementPhoto = {
     id: string;
     achievement_id: string;
     image_url: string;
+    zoom?: number | null;
 };
 
 const TABS = [
@@ -1004,6 +1005,13 @@ export default function Dashboard() {
     async function handleDeleteAchievementPhoto(id: string) {
         await supabase.from("achievement_photos").delete().eq("id", id);
         loadAchievementPhotos();
+    }
+
+    async function handleUpdateAchievementPhotoZoom(id: string, zoom: number) {
+        setAchievementPhotos((prev) =>
+            prev.map((p) => (p.id === id ? { ...p, zoom } : p))
+        );
+        await supabase.from("achievement_photos").update({ zoom }).eq("id", id);
     }
 
     async function handleUploadExperiencePhoto(
@@ -2597,19 +2605,23 @@ export default function Dashboard() {
                             </div>
 
                             <Field label="Renk">
-                                <div className="flex gap-3">
-                                    {["orange", "green", "blue", "purple"].map((c) => (
+                                <div className="flex gap-3 flex-wrap">
+                                    {[
+                                        { key: "orange", hex: "#f97316" },
+                                        { key: "green", hex: "#10b981" },
+                                        { key: "blue", hex: "#6366f1" },
+                                        { key: "purple", hex: "#c026d3" },
+                                        { key: "red", hex: "#ef4444" },
+                                        { key: "pink", hex: "#ec4899" },
+                                        { key: "yellow", hex: "#eab308" },
+                                        { key: "teal", hex: "#14b8a6" },
+                                    ].map(({ key: c, hex }) => (
                                         <button
                                             key={c}
                                             type="button"
                                             onClick={() => setAchColor(c)}
                                             className={`w-8 h-8 rounded-full border-2 ${achColor === c ? "border-white" : "border-transparent"}`}
-                                            style={{
-                                                background:
-                                                    c === "orange" ? "#f97316" :
-                                                        c === "green" ? "#10b981" :
-                                                            c === "blue" ? "#6366f1" : "#c026d3",
-                                            }}
+                                            style={{ background: hex }}
                                         />
                                     ))}
                                 </div>
@@ -2775,24 +2787,52 @@ export default function Dashboard() {
 
                                             <div className="flex gap-3 flex-wrap items-center">
                                                 {photos.map((p, pIndex) => (
-                                                    <div key={p.id} className="relative group/photo">
-                                                        <img
-                                                            src={p.image_url}
-                                                            alt=""
-                                                            className="w-24 h-20 rounded-xl object-cover border border-white/10 group-hover/photo:border-purple-400 transition-all shadow-md"
-                                                        />
-                                                        {pIndex === 0 && (
-                                                            <span className="absolute bottom-1 left-1 bg-black/85 text-[9px] font-bold text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">
-                                                                ⭐ Kapak
-                                                            </span>
-                                                        )}
-                                                        <button
-                                                            onClick={() => handleDeleteAchievementPhoto(p.id)}
-                                                            className="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-500 rounded-full w-5 h-5 text-xs text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"
-                                                            title="Fotoğrafı Sil"
+                                                    <div key={p.id} className="relative group/photo flex flex-col items-center gap-1">
+                                                        <div className="relative">
+                                                            <img
+                                                                src={p.image_url}
+                                                                alt=""
+                                                                className="w-24 h-20 rounded-xl object-cover border border-white/10 group-hover/photo:border-purple-400 transition-all shadow-md"
+                                                            />
+                                                            {pIndex === 0 && (
+                                                                <span className="absolute bottom-1 left-1 bg-black/85 text-[9px] font-bold text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">
+                                                                    ⭐ Kapak
+                                                                </span>
+                                                            )}
+                                                            <button
+                                                                onClick={() => handleDeleteAchievementPhoto(p.id)}
+                                                                className="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-500 rounded-full w-5 h-5 text-xs text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+                                                                title="Fotoğrafı Sil"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                        <div
+                                                            className="flex items-center gap-1 w-24 bg-zinc-900/80 border border-white/10 rounded-full px-1 py-0.5"
+                                                            title="Arka plan yakınlaştırma (100-250)"
                                                         >
-                                                            ×
-                                                        </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleUpdateAchievementPhotoZoom(p.id, Math.max(0, (p.zoom ?? 150) - 10))
+                                                                }
+                                                                className="w-4 h-4 shrink-0 rounded-full bg-white/5 hover:bg-purple-600 text-zinc-400 hover:text-white text-[10px] font-bold flex items-center justify-center transition-colors"
+                                                            >
+                                                                −
+                                                            </button>
+                                                            <span className="flex-1 text-center text-[10px] font-semibold text-zinc-300 tabular-nums">
+                                                                🔍 {p.zoom ?? 150}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleUpdateAchievementPhotoZoom(p.id, Math.min(250, (p.zoom ?? 150) + 10))
+                                                                }
+                                                                className="w-4 h-4 shrink-0 rounded-full bg-white/5 hover:bg-purple-600 text-zinc-400 hover:text-white text-[10px] font-bold flex items-center justify-center transition-colors"
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 ))}
 

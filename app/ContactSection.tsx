@@ -148,18 +148,8 @@ export default function ContactSection({
     return (
         <div className="relative">
 
-            <div className="relative z-[1] mb-10 text-left">
-                <h2 className="text-3xl font-semibold mb-2">{dict.contactHeading}</h2>
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-purple-400">
-                    {dict.contactEyebrow}
-                </span>
-            </div>
-
             <div className="relative z-[1] grid grid-cols-1 items-start gap-10 md:grid-cols-[auto_1fr] md:gap-10 lg:gap-32">
                 <div>
-                    <h2 className="mb-4 bg-gradient-to-br from-white via-purple-300 to-fuchsia-300 bg-clip-text text-[36px] font-extrabold leading-tight text-transparent">
-                        {localize(contactInfo, "heading", locale) || dict.defaultContactHeading}
-                    </h2>
                     <p className="mb-7 max-w-[420px] text-[14.5px] leading-[1.75] text-zinc-400">
                         {localize(contactInfo, "description", locale) || dict.defaultContactDescription}
                     </p>

@@ -65,7 +65,10 @@ export default async function Home({
             .from("achievements")
             .select("*")
             .order("sort_order", { ascending: true }),
-        supabase.from("achievement_photos").select("*"),
+        supabase
+            .from("achievement_photos")
+            .select("*")
+            .order("created_at", { ascending: true }),
     ]);
 
     return (
@@ -152,7 +155,14 @@ export default async function Home({
             {/* DİĞER BÖLÜMLER */}
             <div className="w-full px-6 md:px-12 lg:px-32 py-16 space-y-16">
                 <section id="egitim">
-                    <h2 className="text-3xl font-semibold mb-8">{dict.sectionEducation}</h2>
+                    <div className="mb-10">
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                            {dict.sectionEducation}
+                        </h2>
+                        <p className="text-sm md:text-base text-zinc-400 mt-2 max-w-lg">
+                            {dict.sectionEducationSubtitle}
+                        </p>
+                    </div>
                     <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
                         <ul className="relative border-l-2 border-gradient-to-b space-y-10 pl-8 max-w-2xl">
                             {educations?.map((edu, i) => (
@@ -199,13 +209,13 @@ export default async function Home({
                 </section>
 
                 <section id="deneyim">
-                    <div className="text-center mb-16 animate-fade-in-up">
-                        <p className="text-xs tracking-[0.18em] uppercase text-purple-400 font-semibold mb-2">
-                            {dict.sectionExperienceEyebrow}
-                        </p>
-                        <h2 className="text-3xl font-extrabold bg-gradient-to-br from-white via-purple-300 to-fuchsia-300 bg-clip-text text-transparent">
+                    <div className="mb-10 text-center animate-fade-in-up">
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
                             {dict.sectionExperience}
                         </h2>
+                        <p className="text-sm md:text-base text-zinc-400 mt-2 max-w-lg mx-auto">
+                            {dict.sectionExperienceEyebrow}
+                        </p>
                     </div>
                     <ExperienceTimeline
                         experiences={experiences ?? []}
@@ -215,9 +225,15 @@ export default async function Home({
                         locale={locale}
                     />
                 </section>
-
                 <section id="projeler">
-                    <h2 className="text-3xl font-semibold mb-8">{dict.sectionProjects}</h2>
+                    <div className="mb-10">
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                            {dict.sectionProjects}
+                        </h2>
+                        <p className="text-sm md:text-base text-zinc-400 mt-2 max-w-lg">
+                            {dict.sectionProjectsSubtitle}
+                        </p>
+                    </div>
                     <ProjectsShowcase
                         projects={projects ?? []}
                         projectPhotos={projectPhotos ?? []}
@@ -234,6 +250,14 @@ export default async function Home({
                 </section>
 
                 <section id="iletisim">
+                    <div className="mb-10">
+                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                            {dict.sectionContact}
+                        </h2>
+                        <p className="text-sm md:text-base text-zinc-400 mt-2 max-w-lg">
+                            {dict.sectionContactSubtitle}
+                        </p>
+                    </div>
                     <ContactSection
                         profile={profile}
                         contactInfo={contactInfo}
