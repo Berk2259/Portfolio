@@ -111,7 +111,7 @@ function PolaroidPhoto({
                     ? () => setIndex((prev) => (prev + 1) % photos.length)
                     : undefined
             }
-            className={`relative w-full max-w-[300px] bg-white pt-4 px-4 pb-14 rounded-md transition-transform duration-500 ease-out hover:!rotate-0 hover:scale-[1.03] hover:-translate-y-1 ${photos.length > 1 ? "cursor-pointer" : ""
+            className={`relative w-full max-w-[150px] xl:max-w-[200px] min-[1800px]:max-w-[300px] bg-white pt-2 px-2 pb-9 xl:pt-3 xl:px-3 xl:pb-11 min-[1800px]:pt-4 min-[1800px]:px-4 min-[1800px]:pb-14 rounded-md transition-transform duration-500 ease-out hover:!rotate-0 hover:scale-[1.03] hover:-translate-y-1 ${photos.length > 1 ? "cursor-pointer" : ""
                 }`}
             style={{
                 transform: `rotate(${tilt}deg)`,
@@ -218,7 +218,7 @@ function TimelineItem({
                 transform: active ? "translateY(0)" : "translateY(28px)",
             }}
         >
-            <div className="relative overflow-hidden rounded-[18px] px-7 py-6">
+            <div className="relative overflow-hidden rounded-[18px] px-4 py-4 xl:px-6 xl:py-5 min-[1800px]:px-7 min-[1800px]:py-6">
                 <div
                     className="absolute top-0 left-0 right-0 h-[3px]"
                     style={{ background: `linear-gradient(90deg, ${c1}, ${c2})` }}
@@ -234,14 +234,14 @@ function TimelineItem({
                         >
                             {icon}
                         </span>
-                        <span className="font-bold text-white text-[17.5px]">
+                        <span className="font-bold text-white text-[14.5px] xl:text-[16px] min-[1800px]:text-[17.5px]">
                             {localize(exp, "position", locale) || exp.company}
                         </span>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
                         {exp.start_date && (
                             <span
-                                className="text-[13px] font-bold text-white rounded-full px-3 py-1.5 whitespace-nowrap"
+                                className="text-[11px] xl:text-[12px] min-[1800px]:text-[13px] font-bold text-white rounded-full px-2.5 py-1 xl:px-3 xl:py-1.5 whitespace-nowrap"
                                 style={{
                                     background: `linear-gradient(90deg, ${c1}, ${c2})`,
                                 }}
@@ -254,7 +254,7 @@ function TimelineItem({
                         )}
                     </div>
                 </div>
-                <p className="text-[12.5px] text-zinc-400 mt-1 mb-4">
+                <p className="text-[11px] xl:text-[12px] min-[1800px]:text-[12.5px] text-zinc-400 mt-1 mb-4">
                     {exp.company}
                     {exp.work_type && ` • ${localize(exp, "work_type", locale)}`}
                 </p>
@@ -263,7 +263,7 @@ function TimelineItem({
                         {bullets.map((b, i) => (
                             <li
                                 key={i}
-                                className="relative pl-[22px] text-[14.5px] leading-[1.75] text-zinc-300"
+                                className="relative pl-[20px] text-[12.5px] xl:text-[13.5px] min-[1800px]:text-[14.5px] leading-[1.6] min-[1800px]:leading-[1.75] text-zinc-300"
                             >
                                 <span
                                     className="absolute left-0 top-[5px] w-3 h-3 rounded bg-center bg-no-repeat opacity-85"
@@ -284,11 +284,11 @@ function TimelineItem({
     );
 
     const skillsRow = skills.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+        <div className="flex flex-wrap content-start gap-3 lg:gap-4 justify-center lg:justify-start lg:w-[180px] xl:w-[260px] min-[1800px]:w-[400px]">
             {skills.map((skill) => (
                 <div key={skill.id} className="flex flex-col items-center gap-2">
                     <span
-                        className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                        className="w-9 h-9 xl:w-11 xl:h-11 min-[1800px]:w-14 min-[1800px]:h-14 rounded-xl flex items-center justify-center overflow-hidden"
                         style={{
                             backgroundColor: `${c1}1a`,
                             border: `1px solid ${c1}4d`,
@@ -298,13 +298,13 @@ function TimelineItem({
                             <img
                                 src={skill.logo_url}
                                 alt={skill.name}
-                                className="w-9 h-9 object-contain"
+                                className="w-6 h-6 xl:w-7 xl:h-7 min-[1800px]:w-9 min-[1800px]:h-9 object-contain"
                             />
                         ) : (
                             <span className="text-2xl">💠</span>
                         )}
                     </span>
-                    <span className="text-[11.5px] text-zinc-400">{skill.name}</span>
+                    <span className="text-[9px] xl:text-[10.5px] min-[1800px]:text-[11.5px] text-zinc-400">{skill.name}</span>
                 </div>
             ))}
         </div>
@@ -312,7 +312,7 @@ function TimelineItem({
 
     const highlightBox = exp.highlight && (
         <div
-            className="rounded-2xl px-5 py-4 w-full"
+              className="rounded-2xl px-3 py-3 xl:px-4 xl:py-3.5 min-[1800px]:px-5 min-[1800px]:py-4 w-full"
             style={{
                 backgroundColor: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.08)",
@@ -320,7 +320,7 @@ function TimelineItem({
             }}
         >
             <p
-                className="text-[9.5px] tracking-[0.12em] uppercase font-bold mb-3.5"
+                className="text-[8px] xl:text-[9px] min-[1800px]:text-[9.5px] tracking-[0.1em] uppercase font-bold mb-2.5 xl:mb-3 min-[1800px]:mb-3.5"
                 style={{ color: c1 }}
             >
                 {locale === "en" ? "Key Achievements" : "Öne Çıkan Başarı"}
@@ -333,26 +333,19 @@ function TimelineItem({
                     .map((line, i) => (
                         <li key={i} className="flex items-start gap-2.5">
                             <span
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                                className="w-4.5 h-4.5 xl:w-5 xl:h-5 min-[1800px]:w-6 min-[1800px]:h-6 rounded-full flex items-center justify-center text-[9px] xl:text-[10px] min-[1800px]:text-[11px] font-bold text-white shrink-0"
                                 style={{
                                     background: `linear-gradient(135deg, ${c1}, ${c2})`,
                                 }}
                             >
                                 {i + 1}
                             </span>
-                            <span className="text-[13.5px] text-zinc-300 leading-relaxed">
+                            <span className="text-[11px] xl:text-[12.5px] min-[1800px]:text-[13.5px] leading-relaxed">
                                 {line}
                             </span>
                         </li>
                     ))}
             </ul>
-        </div>
-    );
-
-    const sidePanel = (skillsRow || highlightBox) && (
-        <div className="flex flex-col gap-5 w-full lg:w-[400px] pt-1">
-            {skillsRow}
-            {highlightBox}
         </div>
     );
 
@@ -367,17 +360,22 @@ function TimelineItem({
         />
     );
 
-    const photo = polaroid && (
+    const photo = (polaroid || skillsRow || highlightBox) && (
         <div
-            className={`transition-all duration-700 ease-out delay-100 flex flex-col items-center gap-6 lg:gap-10 ${cardOnLeft ? "lg:flex-row" : "lg:flex-row-reverse"
-                }`}
+            className="transition-all duration-700 ease-out delay-100 flex flex-col gap-4 xl:gap-5 min-[1800px]:gap-6 w-full lg:w-[344px] xl:w-[476px] min-[1800px]:w-[740px] pt-1"
             style={{
                 opacity: active ? 1 : 0,
                 transform: active ? "translateY(0)" : "translateY(28px)",
             }}
         >
-            {polaroid}
-            {sidePanel}
+            <div
+                className={`flex items-start gap-3 xl:gap-4 min-[1800px]:gap-10 ${cardOnLeft ? "" : "flex-row-reverse"
+                    }`}
+            >
+                {polaroid}
+                {skillsRow}
+            </div>
+            {highlightBox}
         </div>
     );
 

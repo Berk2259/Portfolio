@@ -53,7 +53,7 @@ function ContactRow({
             href={href}
             target={href.startsWith("http") ? "_blank" : undefined}
             rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-            className="group relative flex items-center gap-4 overflow-hidden rounded-xl border border-white/8 bg-[#0e0c17] px-5 py-4 text-white no-underline transition-transform duration-200 hover:translate-x-1"
+            className="group relative flex flex-1 items-center gap-4 overflow-hidden rounded-xl border border-white/8 bg-[#0e0c17] px-6 py-4 text-white no-underline transition-transform duration-200 hover:translate-x-1"
         >
             <span
                 className="pointer-events-none absolute inset-y-0 w-1/2"
@@ -148,7 +148,7 @@ export default function ContactSection({
     return (
         <div className="relative">
 
-            <div className="relative z-[1] grid grid-cols-1 items-start gap-10 md:grid-cols-[auto_1fr] md:gap-10 lg:gap-32">
+            <div className="relative z-[1] grid grid-cols-1 items-start gap-y-6 gap-x-10 md:grid-cols-[auto_1fr] md:gap-x-10 md:gap-y-8 lg:gap-x-16">
                 <div>
                     <p className="mb-7 max-w-[420px] text-[14.5px] leading-[1.75] text-zinc-400">
                         {localize(contactInfo, "description", locale) || dict.defaultContactDescription}
@@ -173,24 +173,19 @@ export default function ContactSection({
                         href={localize(contactInfo, "cv_url", locale) || "#"}
                         target={localize(contactInfo, "cv_url", locale) ? "_blank" : undefined}
                         rel={localize(contactInfo, "cv_url", locale) ? "noopener noreferrer" : undefined}
-                        className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-[13.5px] font-semibold text-white transition-colors hover:border-purple-400/50 hover:bg-purple-400/10"
+                        className="cv-glass-border inline-flex items-center gap-2.5 rounded-2xl bg-white/[0.03] backdrop-blur-md px-6 py-3.5 text-sm font-bold text-white whitespace-nowrap overflow-hidden transition-colors hover:bg-purple-400/10"
                     >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ededed" strokeWidth={2}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2}>
                             <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" />
                         </svg>
                         {dict.cvDownload}
                     </a>
                 </div>
-
-                <div className="order-2 md:order-1 flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16">
-                    <div className="hidden lg:flex max-w-[560px] flex-1 flex-col gap-3">
-                        <ContactLinks contactInfo={contactInfo} locale={locale} />
-                    </div>
-
+                <div className="order-2 md:order-1 md:self-start md:-mt-4">
                     <QuizBlob questions={quizQuestions} locale={locale} />
                 </div>
 
-                <div className="order-1 md:order-2 flex flex-col gap-3 md:col-span-2 lg:hidden">
+                <div className="order-1 md:order-3 flex flex-col sm:flex-row gap-4 md:col-span-2">
                     <ContactLinks contactInfo={contactInfo} locale={locale} />
                 </div>
             </div>

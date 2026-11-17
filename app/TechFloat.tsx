@@ -7,15 +7,17 @@ type Skill = {
 export default function TechFloat({ skills }: { skills: Skill[] }) {
     if (!skills || skills.length === 0) return null;
 
+    const track = [...skills, ...skills];
+
     return (
         <div
-            className="order-2 lg:order-none static lg:absolute lg:bottom-16 left-0 w-full overflow-hidden px-6 md:pl-12 lg:pl-50 mt-10 lg:mt-0 lg:[mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] lg:[-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]"
+            className="order-2 lg:order-none static lg:absolute lg:bottom-16 left-0 w-full overflow-hidden ml-6 md:ml-12 lg:ml-50 mt-10 lg:mt-0 [mask-image:linear-gradient(to_right,transparent,black_48px,black_calc(100%-48px),transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_48px,black_calc(100%-48px),transparent)]"
         >
-            <div className="relative flex flex-wrap items-center justify-center gap-x-4 gap-y-3 lg:flex-nowrap lg:justify-start lg:gap-8 w-full">
-                {skills.map((skill) => (
+            <div className="marquee-track flex items-center w-max">
+                {track.map((skill, i) => (
                     <div
-                        key={skill.id}
-                        className="flex flex-col items-center gap-1 shrink-0"
+                        key={`${skill.id}-${i}`}
+                        className="flex flex-col items-center gap-1 shrink-0 mr-6 md:mr-8"
                     >
                         {skill.logo_url && (
                             <img

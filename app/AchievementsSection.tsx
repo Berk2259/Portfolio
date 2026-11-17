@@ -272,7 +272,7 @@ export default function AchievementsSection({
                     return (
                         <div
                             key={ach.id}
-                            className={`card-scene h-[490px] w-full ${isFlipped ? "is-flipped" : ""} ${isFlipping ? "is-flipping" : ""}`}
+                            className={`card-scene h-[640px] w-full ${isFlipped ? "is-flipped" : ""} ${isFlipping ? "is-flipping" : ""}`}
                             style={{ ["--accent-glow" as any]: `${accent}48` }}
                             onMouseMove={(e) => handleTilt(e, ach.id)}
                             onMouseLeave={(e) => resetTilt(e, ach.id)}
@@ -376,16 +376,10 @@ export default function AchievementsSection({
                                     {/* ================= ARKA YÜZ (FLIP DETAY) ================= */}
                                     <div className="flip-back p-6 flex flex-col justify-between">
                                         <div className="space-y-4">
-                                            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                                            <div className="flex items-center pb-3 border-b border-white/10">
                                                 <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
                                                     <span>⚡</span> {locale === "en" ? "Behind the Scenes" : "Sahne Arkası & Rolüm"}
                                                 </span>
-                                                <button
-                                                    onClick={() => toggleFlip(ach.id)}
-                                                    className="text-xs text-zinc-400 hover:text-white px-2.5 py-1 rounded-lg bg-white/10 transition-colors"
-                                                >
-                                                    ← {locale === "en" ? "Flip Back" : "Ön Yüze Dön"}
-                                                </button>
                                             </div>
 
                                             {/* Rol Alanı */}

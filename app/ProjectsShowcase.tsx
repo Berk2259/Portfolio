@@ -329,14 +329,14 @@ export default function ProjectsShowcase({
     const photos = projectPhotos.filter((p) => p.project_id === selected.id);
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-4 xl:gap-6 min-[1800px]:gap-8 items-start">
             {/* LİSTE */}
-            <div className="flex flex-col gap-4 w-full lg:w-130 lg:shrink-0">
+            <div className="flex flex-col gap-2.5 xl:gap-3.5 min-[1800px]:gap-4 w-full lg:w-[260px] xl:w-[420px] min-[1800px]:w-130 lg:shrink-0">
                 {projects.map((project, i) => (
                     <button
                         key={project.id}
                         onClick={() => setSelectedId(project.id)}
-                        className={`flex items-center justify-between gap-4 p-4 min-h-[150px] rounded-2xl border text-left transition-colors ${project.id === selected.id
+                        className={`flex items-center justify-between gap-2.5 xl:gap-4 p-2.5 xl:p-3.5 min-[1800px]:p-4 min-h-[90px] xl:min-h-[130px] min-[1800px]:min-h-[150px] rounded-2xl border text-left transition-colors ${project.id === selected.id
                             ? "bg-indigo-500/10 border-indigo-400/50"
                             : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/15"
                             }`}
@@ -346,13 +346,13 @@ export default function ProjectsShowcase({
                                 <img
                                     src={project.image_url}
                                     alt={localize(project, "title", locale) || project.title}
-                                    className="w-24 h-24 object-cover rounded-xl shrink-0"
+                                    className="w-12 h-12 xl:w-20 xl:h-20 min-[1800px]:w-24 min-[1800px]:h-24 object-cover rounded-xl shrink-0"
                                 />
                             ) : (
-                                <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-600/30 shrink-0" />
+                                <div className="w-12 h-12 xl:w-20 xl:h-20 min-[1800px]:w-24 min-[1800px]:h-24 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-600/30 shrink-0" />
                             )}
                             <div>
-                                <div className="text-white font-semibold text-lg mb-1.5">
+                                <div className="text-white font-semibold text-xs xl:text-base min-[1800px]:text-lg mb-0.5 xl:mb-1.5">
                                     {localize(project, "title", locale) || project.title}
                                 </div>
                                 {project.tech_stack && (
@@ -365,7 +365,7 @@ export default function ProjectsShowcase({
                                             .map((tag) => (
                                                 <span
                                                     key={tag}
-                                                    className="text-xs text-indigo-300 border border-indigo-400/25 bg-indigo-400/10 rounded-full px-2.5 py-1"
+                                                    className="text-[9px] xl:text-xs text-indigo-300 border border-indigo-400/25 bg-indigo-400/10 rounded-full px-1.5 py-0.5 xl:px-2.5 xl:py-1"
                                                 >
                                                     {tag}
                                                 </span>
@@ -373,7 +373,7 @@ export default function ProjectsShowcase({
                                     </div>
                                 )}
                                 {project.description && (
-                                    <p className="text-sm text-white/55 mt-2 line-clamp-2 max-w-[280px]">
+                                    <p className="text-[11px] xl:text-sm text-white/55 mt-1 xl:mt-2 line-clamp-2 max-w-[140px] xl:max-w-[220px] min-[1800px]:max-w-[280px]">
                                         {localize(project, "description", locale)
                                             ?.split(/[•\n]/)
                                             .map((d) => d.trim())

@@ -33,17 +33,17 @@ export default function PhotoStack({ photos }: { photos: Photo[] }) {
     }
 
     const collapsedPositions = [
-        "rotate-[-8deg] top-0 left-0",
-        "rotate-[6deg] top-3 left-3",
-        "rotate-[-4deg] top-6 left-6",
-        "rotate-[9deg] top-9 left-9",
+        "rotate-[-4deg] -translate-x-2 -translate-y-2",
+        "rotate-[6deg] translate-x-8 -translate-y-4",
+        "rotate-[-7deg] -translate-x-12 translate-y-8",
+        "rotate-[10deg] translate-x-16 translate-y-14",
     ];
 
     const expandedPositions = [
-        "rotate-0 top-0 left-0",
-        "rotate-0 top-0 left-[350px]",
-        "rotate-0 top-[350px] left-0",
-        "rotate-0 top-[350px] left-[350px]",
+        "rotate-0 -translate-x-44 -translate-y-44",
+        "rotate-0 translate-x-44 -translate-y-44",
+        "rotate-0 -translate-x-44 translate-y-44",
+        "rotate-0 translate-x-44 translate-y-44",
     ];
 
     if (!photos || photos.length === 0) return null;
@@ -81,7 +81,7 @@ export default function PhotoStack({ photos }: { photos: Photo[] }) {
                             key={photo.id}
                             src={photo.image_url}
                             alt="Galeri fotoğrafı"
-                            className={`absolute w-80 h-80 object-cover rounded-xl shadow-2xl ring-4 ring-black/40 transition-all duration-500 ease-in-out ${pos}`}
+                            className={`absolute inset-0 m-auto w-80 h-80 object-cover rounded-xl shadow-2xl ring-4 ring-black/40 transition-all duration-500 ease-in-out ${pos}`}
                             style={{ zIndex: expanded ? i : photos.length - i }}
                         />
                     );
