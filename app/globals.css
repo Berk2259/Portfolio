@@ -679,3 +679,8 @@ body {
 .cv-h2-text { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 3px; }
 .cv-h2-title { font-size: 17px; font-weight: 800; }
 .cv-h2-sub { font-size: 11.5px; font-weight: 600; color: #9ca3af; }
+@media (min-width: 768px) {
+  .contact-grid-cols {
+    grid-template-columns: auto 1fr;
+  }
+}

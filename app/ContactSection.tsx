@@ -148,7 +148,7 @@ export default function ContactSection({
     return (
         <div className="relative">
 
-            <div className="relative z-[1] grid grid-cols-1 items-start gap-y-6 gap-x-10 md:grid-cols-[auto_1fr] md:gap-x-10 md:gap-y-8 lg:gap-x-16">
+            <div className="contact-grid-cols relative z-[1] grid grid-cols-1 items-start gap-y-6 gap-x-10 md:gap-x-10 md:gap-y-8 lg:gap-x-16">
                 <div>
                     <p className="mb-7 max-w-[420px] text-[14.5px] leading-[1.75] text-zinc-400">
                         {localize(contactInfo, "description", locale) || dict.defaultContactDescription}
